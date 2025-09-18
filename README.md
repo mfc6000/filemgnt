@@ -2,12 +2,10 @@
 
 This repository provides the groundwork for the file management platform: a Node.js + Express backend, a Vue 3 + Vite + TypeScript frontend, LowDB storage, and Docker tooling. The HTTP handlers still return `501 Not Implemented`, allowing teams to focus on architecture, conventions, and integration points before building full features.
 
-
 ## Prerequisites
 
 - Node.js 18+
 - npm 9+
-
 - Docker (optional, for containerised workflow)
 
 ## Environment variables
@@ -73,7 +71,6 @@ Services start on:
 - `http://localhost:5173` – Frontend (Nginx)
 
 Database state (`db.json`) and uploaded files (`uploads/`) are bind-mounted to preserve data across container restarts. Shut everything down with `docker compose down`.
-
 
 ## Project structure
 
