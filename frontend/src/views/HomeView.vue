@@ -23,6 +23,7 @@ import { useAuthStore } from '@/store';
 
 const authStore = useAuthStore();
 const username = computed(() => authStore.user?.username ?? 'there');
+
 </script>
 
 <style scoped>

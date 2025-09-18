@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { useAuthStore } from '@/store';
 
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/',

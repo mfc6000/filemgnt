@@ -1,13 +1,13 @@
 <template>
   <a-layout class="app-shell">
     <a-layout-header class="app-header">
-      <div class="brand" role="button" tabindex="0" @click="goHome" @keyup.enter="goHome">
+     <div class="brand" role="button" tabindex="0" @click="goHome" @keyup.enter="goHome">
         <a-typography-title :heading="5">File Management</a-typography-title>
         <span class="tagline">Organize, search, and share securely</span>
       </div>
       <div class="header-actions">
         <a-space :size="12" align="center">
-          <template v-if="isAuthenticated">
+         <template v-if="isAuthenticated">
             <a-typography-text class="welcome-text">
               Hello, <strong>{{ username }}</strong>
             </a-typography-text>
