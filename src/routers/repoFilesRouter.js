@@ -11,13 +11,4 @@ router.get('/:repoId/files', (req, res) => {
   });
 });
 
-router.post('/:repoId/files', (req, res) => {
-  res.status(501).json({
-    error: {
-      code: 'NOT_IMPLEMENTED',
-      message: 'Upload repository file is not implemented yet.',
-    },
-  });
-});
-
 module.exports = router;
