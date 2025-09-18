@@ -10,7 +10,7 @@ function getDifyConfig() {
   const baseUrl = normalizeBaseUrl(process.env.DIFY_BASE_URL);
   const kbId = process.env.DIFY_KB_ID;
   const apiKey = process.env.DIFY_API_KEY;
-  
+
   return {
     baseUrl,
     kbId,

@@ -5,13 +5,25 @@
         Welcome to the File Management System
       </template>
       <p>
-        This is a placeholder view. Start wiring up repository, file, and search modules here.
+        Hi <strong>{{ username }}</strong>! Use the navigation to manage repositories, upload documents,
+        and search across your synced knowledge base.
+      </p>
+      <a-divider />
+      <p>
+        This area will host dashboards, quick actions, and helpful summaries in future iterations.
+        For now, the authenticated shell and routing guards are ready for feature development.
       </p>
     </a-card>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useAuthStore } from '@/store';
+
+const authStore = useAuthStore();
+const username = computed(() => authStore.user?.username ?? 'there');
+
 </script>
 
 <style scoped>

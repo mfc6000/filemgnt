@@ -1,14 +1,23 @@
 <template>
   <a-layout class="app-shell">
     <a-layout-header class="app-header">
-      <div class="brand">
+     <div class="brand" role="button" tabindex="0" @click="goHome" @keyup.enter="goHome">
         <a-typography-title :heading="5">File Management</a-typography-title>
         <span class="tagline">Organize, search, and share securely</span>
       </div>
       <div class="header-actions">
         <a-space :size="12" align="center">
-          <a-button type="text" class="header-link">Docs</a-button>
-          <a-button type="primary" shape="round">Login</a-button>
+         <template v-if="isAuthenticated">
+            <a-typography-text class="welcome-text">
+              Hello, <strong>{{ username }}</strong>
+            </a-typography-text>
+            <a-tag v-if="isAdmin" color="orangered" bordered>Admin</a-tag>
+            <a-button type="outline" size="small" @click="handleLogout">Logout</a-button>
+          </template>
+          <template v-else>
+            <a-button type="text" class="header-link" @click="openDocs">Docs</a-button>
+            <a-button type="primary" shape="round" @click="goLogin">Login</a-button>
+          </template>
         </a-space>
       </div>
     </a-layout-header>
@@ -19,6 +28,37 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store';
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+const isAdmin = computed(() => authStore.isAdmin);
+const username = computed(() => authStore.user?.username ?? '');
+
+const goLogin = () => {
+  router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } });
+};
+
+const handleLogout = () => {
+  authStore.logout();
+  router.push({ name: 'login' });
+};
+
+const goHome = () => {
+  if (isAuthenticated.value) {
+    router.push({ name: 'home' });
+  } else {
+    router.push({ name: 'login' });
+  }
+};
+
+const openDocs = () => {
+  window.open('https://example.com/docs', '_blank');
+};
 </script>
 
 <style scoped>
@@ -43,6 +83,12 @@
 .brand {
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+}
+
+.brand:focus-visible {
+  outline: 2px solid var(--color-primary-6);
+  outline-offset: 4px;
 }
 
 .brand .tagline {
@@ -52,6 +98,16 @@
 
 .header-actions {
   display: flex;
+  align-items: center;
+}
+
+.header-link {
+  color: var(--color-text-1);
+}
+
+.welcome-text {
+  display: inline-flex;
+  gap: 4px;
   align-items: center;
 }
 
