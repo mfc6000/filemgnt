@@ -21,8 +21,8 @@ function createApp() {
   app.use('/api/auth', authRouter);
   app.use('/api/admin/users', authMiddleware, requireAdmin, adminUsersRouter);
   app.use('/api/admin/files', authMiddleware, requireAdmin, adminFilesRouter);
-  app.use('/api/repos/router', authMiddleware, reposRouter);
-  app.use('/api/repos/filesrouter', authMiddleware, repoFilesRouter);
+  app.use('/api/repos', authMiddleware, reposRouter);
+  app.use('/api/repos', authMiddleware, repoFilesRouter);
   app.use('/api/search', searchRouter);
 
   app.use(notFoundHandler);

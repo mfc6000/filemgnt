@@ -15,7 +15,7 @@ router.post('/:repoId/files', (req, res) => {
   res.status(501).json({
     error: {
       code: 'NOT_IMPLEMENTED',
-      message: 'List repository files is not implemented yet.',
+      message: 'Upload repository file is not implemented yet.',
     },
   });
 });
