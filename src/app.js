@@ -23,8 +23,7 @@ function createApp() {
   app.use('/api/admin/files', authMiddleware, requireAdmin, adminFilesRouter);
   app.use('/api/repos', authMiddleware, reposRouter);
   app.use('/api/repos', authMiddleware, repoFilesRouter);
-  app.use('/api/search', searchRouter);
-
+  app.use('/api/search', authMiddleware, searchRouter);
   app.use(notFoundHandler);
   app.use(errorHandler);
 

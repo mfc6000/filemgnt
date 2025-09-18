@@ -6,15 +6,31 @@ function normalizeBaseUrl(url) {
   return url.endsWith('/') ? url.slice(0, -1) : url;
 }
 
-async function uploadToDify(filePath, fileName) {
+function getDifyConfig() {
   const baseUrl = normalizeBaseUrl(process.env.DIFY_BASE_URL);
   const kbId = process.env.DIFY_KB_ID;
   const apiKey = process.env.DIFY_API_KEY;
+  
+  return {
+    baseUrl,
+    kbId,
+    apiKey,
+    isConfigured: Boolean(baseUrl && kbId && apiKey),
+  };
+}
 
-  if (!baseUrl || !kbId || !apiKey) {
+function ensureConfigured() {
+  const config = getDifyConfig();
+
+  if (!config.isConfigured) {
     throw new Error('Missing Dify configuration. Ensure DIFY_BASE_URL, DIFY_KB_ID, and DIFY_API_KEY are set.');
   }
 
+  return config;
+}
+
+async function uploadToDify(filePath, fileName) {
+  const { baseUrl, kbId, apiKey } = ensureConfigured();
   const absolutePath = path.isAbsolute(filePath)
     ? filePath
     : path.join(process.cwd(), filePath);
@@ -35,7 +51,10 @@ async function uploadToDify(filePath, fileName) {
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(`Dify upload failed (${response.status}): ${text}`);
+    const error = new Error(`Dify upload failed (${response.status}): ${text}`);
+    error.status = response.status;
+    error.code = 'DIFY_UPLOAD_FAILED';
+    throw error;
   }
 
   const payload = await response.json();
@@ -50,6 +69,49 @@ async function uploadToDify(filePath, fileName) {
   return null;
 }
 
+async function searchKnowledgeBase(query, options = {}) {
+  const { baseUrl, kbId, apiKey } = ensureConfigured();
+
+  const page = Math.max(1, Number.parseInt(options.page, 10) || 1);
+  const pageSize = Math.max(1, Math.min(50, Number.parseInt(options.pageSize, 10) || 10));
+  const offset = (page - 1) * pageSize;
+
+  const body = {
+    query,
+    top_n: pageSize,
+    offset,
+  };
+
+  if (options.filters && Object.keys(options.filters).length > 0) {
+    body.filter = options.filters;
+  }
+
+  const response = await fetch(`${baseUrl}/v1/knowledge-bases/${kbId}/search`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    const error = new Error(`Dify search failed (${response.status}): ${text}`);
+    error.status = response.status;
+    error.code = 'DIFY_SEARCH_FAILED';
+    throw error;
+  }
+
+  return response.json();
+}
+
+function isDifyConfigured() {
+  return getDifyConfig().isConfigured;
+}
+
 module.exports = {
   uploadToDify,
+  searchKnowledgeBase,
+  isDifyConfigured,
 };
