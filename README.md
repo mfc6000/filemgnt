@@ -18,19 +18,99 @@ Duplicate `.env.example` to `.env` and tweak the values as needed.
 | `DIFY_BASE_URL`, `DIFY_KB_ID`, `DIFY_API_KEY` | Credentials for the Dify Knowledge Base integration. |
 | `UPLOAD_MAX_BYTES`, `UPLOAD_ALLOWED_MIME` | File size ceiling and MIME whitelist enforced during uploads. |
 
-## Development workflow
+## Local environment setup (testing & debugging)
 
-1. Install dependencies: `npm install`
-2. Launch the backend with hot reload: `npm run dev`
-3. (Optional) Setup the frontend:
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-4. Visit `http://localhost:5175` for the API and `http://localhost:5173` for the Vite dev server.
+Follow the steps below to spin up a fully working local stack, exercise the APIs, and debug changes.
 
-> ℹ️ All backend endpoints currently respond with `501 Not Implemented` stubs. Replace the service layers under `src/services/` as features roll in.
+### 1. Install dependencies
+
+```bash
+# Backend
+npm install
+
+# Frontend (run in a second terminal)
+cd frontend
+npm install
+```
+
+> If the package registry is slow/blocked in your region, configure an npm mirror before running `npm install`.
+
+### 2. Prepare environment files
+
+1. Copy `.env.example` to `.env` at the repository root and adjust values if needed. Leaving the Dify keys blank keeps the backend in "local search" mode.
+2. (Optional) Duplicate `frontend/.env.example` to `frontend/.env` if you want to override the Vite dev server port or inject additional frontend environment variables.
+
+### 3. Seed local data
+
+- `db.json` ships with sample accounts (`admin` / `admin123`, `user` / `user123`), repositories, and files. Modify it freely while iterating.  
+- To reset the datastore, delete `db.json` and restore it from version control (e.g., `git checkout -- db.json`) or keep a personal template handy.  
+- Uploaded binaries land under `uploads/`. Remove files here if you want a clean state.
+
+### 4. Run the backend
+
+```bash
+npm run dev
+```
+
+`npm run dev` starts the Express server with Nodemon on port `5175`, automatically reloading when you edit source files. Useful debugging tricks:
+
+- **Enable verbose logging** – the request logger middleware already prints every API call; add `console.log` statements inside routers/services as needed.
+- **Attach a debugger** – run `NODE_OPTIONS='--inspect=9229' npm run dev` (or `node --inspect src/server.js`) and connect Chrome DevTools / VS Code to `localhost:9229`.
+- **Override ports** – set `PORT=4000` (or any free port) in your `.env` before booting.
+
+Once the server is running you can verify authentication with curl/Postman:
+
+```bash
+curl -X POST http://localhost:5175/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"admin123"}'
+```
+
+The response contains a mock JWT-like token. Reuse it for protected routes:
+
+```bash
+TOKEN=$(curl -sX POST http://localhost:5175/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"admin123"}' \
+  | node -pe "JSON.parse(require('fs').readFileSync(0, 'utf8')).token")
+
+curl http://localhost:5175/api/repos \
+  -H "Authorization: Bearer ${TOKEN}"
+```
+
+### 5. Run the frontend dev server
+
+```bash
+cd frontend
+npm run dev
+```
+
+Vite serves the SPA on `http://localhost:5173` with hot module replacement. The app proxies API calls to `http://localhost:5175/api` by default. While debugging UI flows:
+
+- Inspect network requests via the browser DevTools console.
+- Use Pinia DevTools (Vue DevTools extension) to watch auth state, repositories, and upload progress stores.
+- Adjust the Axios instance in `src/api/http.ts` if you need to hit a remote backend or tunnel.
+
+### 6. Exercise Dify integration (optional)
+
+If you have Dify credentials, populate `DIFY_BASE_URL`, `DIFY_KB_ID`, and `DIFY_API_KEY` in `.env`, restart the backend, and re-upload a file. The backend stores the upstream `difyDocId` without blocking local persistence. Without credentials the system falls back to fuzzy matching over local filenames.
+
+### 7. Run automated checks
+
+Backend and frontend share a placeholder smoke test:
+
+```bash
+npm run test
+```
+
+Augment this script with unit or integration tests as implementation progresses. For frontend-only checks, run the same command within the `frontend/` directory once you add tooling (Vitest, Playwright, etc.).
+
+### 8. Troubleshooting tips
+
+- **Reset state quickly** – stop the servers, delete `uploads/` content, and restore `db.json` from a known snapshot.  
+- **CORS errors** – ensure the backend is running before the frontend; the Express app already enables CORS for dev hosts.  
+- **Port conflicts** – change Vite's port via `frontend/vite.config.ts` or set `VITE_PORT` in `frontend/.env`.  
+- **Docker parity** – if something only fails in containers, run `docker compose up --build` to reproduce the stack with the same environment variables.
 
 ## Testing
 
