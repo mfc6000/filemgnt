@@ -62,7 +62,33 @@ async function createRepo(user, payload) {
   return repo;
 }
 
+async function getRepoForUser(user, repoId) {
+  if (!user || !user.username) {
+    throw createError(401, 'UNAUTHORIZED', 'Authentication required.');
+  }
+
+  const id = typeof repoId === 'string' ? repoId.trim() : '';
+
+  if (!id) {
+    throw createError(400, 'INVALID_REPO_ID', 'Repository identifier is required.');
+  }
+
+  const db = await getDb();
+  const repo = db.data.repos.find((item) => item.id === id);
+
+  if (!repo) {
+    throw createError(404, 'REPO_NOT_FOUND', 'Repository not found.');
+  }
+
+  if (repo.owner !== user.username) {
+    throw createError(403, 'FORBIDDEN_REPO_ACCESS', 'You do not have access to this repository.');
+  }
+
+  return repo;
+}
+
 module.exports = {
   listRepos,
   createRepo,
+  getRepoForUser,
 };
