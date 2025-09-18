@@ -40,6 +40,29 @@ npm run dev
 
 The server will start on the configured `PORT` (defaults to `3000`). All routes return `501 Not Implemented` until the business logic is added.
 
+## Docker
+
+You can run the scaffolded backend and the Vue frontend together with Docker. The Compose stack builds two images:
+
+- `server`: Node.js Express API (exposes port `5175`)
+- `frontend`: Vite-built static assets served by Nginx (exposes port `5173`)
+
+Before building, ensure any Dify configuration is exported in your shell so Compose can forward it to the server container:
+
+```bash
+export DIFY_BASE_URL=https://api.dify.ai
+export DIFY_KB_ID=your_kb_id
+export DIFY_API_KEY=your_api_key
+```
+
+Then build and start the services:
+
+```bash
+docker compose up --build
+```
+
+The API becomes available on `http://localhost:5175` and the frontend on `http://localhost:5173`. Database state (`db.json`) and uploaded files (`uploads/`) are stored on the host via bind mounts so that data persists across container restarts.
+
 ## Project structure
 
 ```
