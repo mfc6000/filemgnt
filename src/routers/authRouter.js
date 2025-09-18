@@ -1,6 +1,5 @@
 const express = require('express');
 const { authenticateCredentials } = require('../middlewares/authMiddleware');
-
 const router = express.Router();
 
 router.post('/login', (req, res) => {
