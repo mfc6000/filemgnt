@@ -13,11 +13,13 @@ Create a `.env` file (or copy from `.env.example`) with the following keys:
 
 ```
 PORT=3000
-DIFY_API_BASE=https://api.dify.ai
+DIFY_BASE_URL=https://api.dify.ai
+DIFY_KB_ID=your_knowledge_base_id
 DIFY_API_KEY=your_dify_api_key_here
 ```
 
-`PORT` controls the HTTP port, and the Dify variables will be used once the integration is implemented.
+`PORT` controls the HTTP port. The Dify variables configure the knowledge-base API endpoint, the knowledge base to sync files
+into, and the API key used for authentication. They are required once the Dify integration is active.
 
 ## Installation
 
