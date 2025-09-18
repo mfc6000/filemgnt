@@ -1,87 +1,93 @@
-# File Management System Backend Scaffold
+# File Management System Scaffold
 
-This repository contains a Node.js + Express scaffold for the file management system described in the architecture documents. Business logic is intentionally left unimplemented to focus on project structure and bootstrapping.
+This repository provides the groundwork for the file management platform: a Node.js + Express backend, a Vue 3 + Vite + TypeScript frontend, LowDB storage, and Docker tooling. The HTTP handlers still return `501 Not Implemented`, allowing teams to focus on architecture, conventions, and integration points before building full features.
+
 
 ## Prerequisites
 
 - Node.js 18+
 - npm 9+
 
+- Docker (optional, for containerised workflow)
+
 ## Environment variables
 
-Create a `.env` file (or copy from `.env.example`) with the following keys:
+Duplicate `.env.example` to `.env` and tweak the values as needed.
 
+| Key | Purpose |
+| --- | --- |
+| `PORT` | Port exposed by the Express API (Compose maps it to `5175`). |
+| `DIFY_BASE_URL`, `DIFY_KB_ID`, `DIFY_API_KEY` | Credentials for the Dify Knowledge Base integration. |
+| `UPLOAD_MAX_BYTES`, `UPLOAD_ALLOWED_MIME` | File size ceiling and MIME whitelist enforced during uploads. |
+
+## Development workflow
+
+1. Install dependencies: `npm install`
+2. Launch the backend with hot reload: `npm run dev`
+3. (Optional) Setup the frontend:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+4. Visit `http://localhost:5175` for the API and `http://localhost:5173` for the Vite dev server.
+
+> ℹ️ All backend endpoints currently respond with `501 Not Implemented` stubs. Replace the service layers under `src/services/` as features roll in.
+
+## Testing
+
+Run the placeholder smoke test:
+
+```bash
+npm run test
 ```
-PORT=3000
-DIFY_BASE_URL=https://api.dify.ai
-DIFY_KB_ID=your_knowledge_base_id
-DIFY_API_KEY=your_dify_api_key_here
-```
 
-`PORT` controls the HTTP port. The Dify variables configure the knowledge-base API endpoint, the knowledge base to sync files
-into, and the API key used for authentication. They are required once the Dify integration is active.
+Extend this command with real unit/integration tests once business logic is delivered.
 
-## Installation
+## Build & production run
 
 ```bash
 npm install
+npm start
 ```
 
-## Available scripts
+`npm start` boots the Express server with production settings. Add additional build steps (TypeScript compilation, bundling, etc.) when you introduce them.
 
-- `npm run dev` – start the server with hot-reload (uses `nodemon`).
-- `npm start` – start the production server with Node.js.
+## Docker workflow
 
-## Development
-
-```bash
-npm run dev
-```
-
-The server will start on the configured `PORT` (defaults to `3000`). All routes return `501 Not Implemented` until the business logic is added.
-
-## Docker
-
-You can run the scaffolded backend and the Vue frontend together with Docker. The Compose stack builds two images:
-
-- `server`: Node.js Express API (exposes port `5175`)
-- `frontend`: Vite-built static assets served by Nginx (exposes port `5173`)
-
-Before building, ensure any Dify configuration is exported in your shell so Compose can forward it to the server container:
+The repository ships with Dockerfiles for the API and the frontend plus a Compose stack that wires them together.
 
 ```bash
+# Ensure Dify variables exist in your shell or .env file
 export DIFY_BASE_URL=https://api.dify.ai
 export DIFY_KB_ID=your_kb_id
 export DIFY_API_KEY=your_api_key
-```
 
-Then build and start the services:
-
-```bash
+# Build and launch
 docker compose up --build
 ```
 
-The API becomes available on `http://localhost:5175` and the frontend on `http://localhost:5173`. Database state (`db.json`) and uploaded files (`uploads/`) are stored on the host via bind mounts so that data persists across container restarts.
+Services start on:
+
+- `http://localhost:5175` – Express API
+- `http://localhost:5173` – Frontend (Nginx)
+
+Database state (`db.json`) and uploaded files (`uploads/`) are bind-mounted to preserve data across container restarts. Shut everything down with `docker compose down`.
+
 
 ## Project structure
 
 ```
 src/
-  app.js              # Express app factory, shared middleware
-  server.js           # Entrypoint that boots the HTTP server
-  middlewares/        # Error handler, 404 handler, request logger
-  routers/            # Route definitions (handlers currently return 501)
-  services/           # Placeholder service modules to be implemented
+  app.js              # Express app factory & shared middleware
+  server.js           # HTTP entry point
+  middlewares/        # Error/404/logging middleware
+  routers/            # Route definitions (currently 501 stubs)
+  services/           # Placeholder service implementations
 uploads/              # File upload destination (kept empty via .gitkeep)
-db.json               # LowDB bootstrap data store
+db.json               # LowDB datastore seeded with demo content
+doc/                  # Architecture, API, and data model references
+frontend/             # Vue 3 + Vite scaffold
 ```
 
-## Testing the scaffold
-
-With dependencies installed you can verify the server boots:
-
-```bash
-npm start
-```
-
-Then send requests (e.g., via curl) to observe `501 Not Implemented` responses.
+Refer to the documents inside `doc/` for acceptance criteria, architecture notes, and upgrade guidance.

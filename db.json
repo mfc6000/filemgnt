@@ -1,5 +1,60 @@
 {
-  "users": [],
-  "repos": [],
-  "files": []
+  "users": [
+    {
+      "id": "user-admin",
+      "username": "admin",
+      "role": "admin",
+      "displayName": "System Administrator",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "user-demo",
+      "username": "demo",
+      "role": "user",
+      "displayName": "Demo User",
+      "createdAt": "2024-01-02T00:00:00.000Z"
+    }
+  ],
+  "repos": [
+    {
+      "id": "repo-admin-001",
+      "ownerId": "user-admin",
+      "name": "admin-inbox",
+      "description": "Default admin repository for shared documents",
+      "createdAt": "2024-01-03T00:00:00.000Z"
+    },
+    {
+      "id": "repo-demo-001",
+      "ownerId": "user-demo",
+      "name": "demo-personal",
+      "description": "Demo user's personal workspace",
+      "createdAt": "2024-01-03T12:00:00.000Z"
+    }
+  ],
+  "files": [
+    {
+      "id": "file-001",
+      "repoId": "repo-admin-001",
+      "uploaderId": "user-admin",
+      "name": "welcome.pdf",
+      "size": 345678,
+      "mime": "application/pdf",
+      "share": true,
+      "createdAt": "2024-01-04T08:00:00.000Z",
+      "storagePath": "uploads/repo-admin-001/welcome.pdf",
+      "difyDocId": "dify-doc-001"
+    },
+    {
+      "id": "file-002",
+      "repoId": "repo-demo-001",
+      "uploaderId": "user-demo",
+      "name": "notes.md",
+      "size": 2048,
+      "mime": "text/markdown",
+      "share": false,
+      "createdAt": "2024-01-05T09:30:00.000Z",
+      "storagePath": "uploads/repo-demo-001/notes.md",
+      "difyDocId": null
+    }
+  ]
 }
