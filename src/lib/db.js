@@ -4,7 +4,13 @@ const { JSONFile } = require('lowdb/node');
 
 const file = path.join(__dirname, '..', '..', 'db.json');
 const adapter = new JSONFile(file);
-const db = new Low(adapter);
+
+const defaultData = {
+  users: [],
+  repos: [],
+  files: [],
+};
+const db = new Low(adapter, defaultData);
 
 async function ensureDataShape() {
   if (!db.data) {
