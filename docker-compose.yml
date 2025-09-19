@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: filemgnt-server
+    ports:
+      - "5175:5175"
+    environment:
+      PORT: "5175"
+      DIFY_BASE_URL: "${DIFY_BASE_URL:-}"
+      DIFY_KB_ID: "${DIFY_KB_ID:-}"
+      DIFY_API_KEY: "${DIFY_API_KEY:-}"
+    volumes:
+      - ./db.json:/app/db.json
+      - ./uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: filemgnt-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
