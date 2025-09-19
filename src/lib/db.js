@@ -4,7 +4,6 @@ const { JSONFile } = require('lowdb/node');
 
 const file = path.join(__dirname, '..', '..', 'db.json');
 const adapter = new JSONFile(file);
-
 const defaultData = {
   users: [],
   repos: [],

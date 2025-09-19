@@ -90,6 +90,7 @@ Vite serves the SPA on `http://localhost:5173` with hot module replacement. The 
 - Inspect network requests via the browser DevTools console.
 - Use Pinia DevTools (Vue DevTools extension) to watch auth state, repositories, and upload progress stores.
 - Adjust the Axios instance in `src/api/http.ts` if you need to hit a remote backend or tunnel.
+- Prefer a full IDE workflow? See [VS Code Debugging Guide](doc/vscode-debugging.md) for step-by-step backend and frontend breakpoint setup, including launch configurations and Chrome integration.
 
 ### 6. Exercise Dify integration (optional)
 
