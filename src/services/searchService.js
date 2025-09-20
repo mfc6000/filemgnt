@@ -104,7 +104,7 @@ async function performDifySearch(user, query, options) {
     if (!record?.documentId) {
       return false;
     }
-
+    
     const file = fileIndex.get(record.documentId);
     if (!file) {
       return false;

@@ -123,7 +123,6 @@ async function refreshDifyDocument(documentId) {
   }
 
   const { apiBaseUrl, kbId, apiKey } = ensureConfigured();
-
   const response = await fetch(
     `${apiBaseUrl}/datasets/${kbId}/documents/${documentId}/indexing-status`,
     {
@@ -145,6 +144,7 @@ async function refreshDifyDocument(documentId) {
       url: `${apiBaseUrl}/datasets/${kbId}/documents/${documentId}/indexing-status`,
       body: text,
     });
+
     throw createDifyError(
       response.status,
       'DIFY_REFRESH_FAILED',
@@ -232,7 +232,9 @@ async function retrieveChunks(options = {}) {
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   const body = { query: query.trim() };
+  
   if (retrievalModel && typeof retrievalModel === 'object' && Object.keys(retrievalModel).length > 0) {
+
     body.retrieval_model = retrievalModel;
   }
 
@@ -253,6 +255,7 @@ async function retrieveChunks(options = {}) {
       timeoutError.code = 'DIFY_RETRIEVE_TIMEOUT';
       timeoutError.timeout = timeoutMs;
       timeoutError.url = url;
+
       logDifyError('Retrieve request timed out', {
         timeoutMs,
         url,
@@ -268,6 +271,7 @@ async function retrieveChunks(options = {}) {
         stack: error.stack,
       },
     });
+
     error.url = url;
     throw error;
   } finally {
@@ -288,6 +292,7 @@ async function retrieveChunks(options = {}) {
       url,
       body: parsedBody,
     });
+
     const requestError = new Error(`Dify retrieve request failed with status ${response.status}`);
     requestError.status = response.status;
     requestError.body = parsedBody;
@@ -319,7 +324,6 @@ async function searchKnowledgeBase(query, options = {}) {
 
   const page = Math.max(1, Number.parseInt(options.page, 10) || 1);
   const pageSize = Math.max(1, Math.min(50, Number.parseInt(options.pageSize, 10) || 10));
-
   const retrievalModel = {};
 
   if (options.retrievalModel && typeof options.retrievalModel === 'object') {
