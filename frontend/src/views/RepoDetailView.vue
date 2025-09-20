@@ -3,22 +3,24 @@
     <a-space direction="vertical" :size="16" fill>
       <a-card :bordered="false">
         <template #title>
-          {{ repo?.name || 'Repository' }}
+          {{ repo?.name || t('repoDetail.fallbackName') }}
         </template>
         <template #extra>
-          <a-button type="text" @click="goBack">Back to repositories</a-button>
+          <a-button type="text" @click="goBack">{{ t('repoDetail.back') }}</a-button>
         </template>
         <p class="description" v-if="repo?.description">{{ repo.description }}</p>
         <div class="meta" v-if="repo">
-          <a-tag :color="repo.visibility === 'shared' ? 'arcoblue' : 'gray'">{{ repo.visibility }}</a-tag>
-          <span>Created: {{ formatDate(repo.createdAt) }}</span>
-          <span>Updated: {{ formatDate(repo.updatedAt) }}</span>
+          <a-tag :color="repo.visibility === 'shared' ? 'arcoblue' : 'gray'">
+            {{ t(`common.visibility.${repo.visibility}`) }}
+          </a-tag>
+          <span>{{ t('repoDetail.meta.created', { date: formatDate(repo.createdAt) }) }}</span>
+          <span>{{ t('repoDetail.meta.updated', { date: formatDate(repo.updatedAt) }) }}</span>
         </div>
       </a-card>
 
       <a-card :bordered="false">
         <template #title>
-          Upload files
+          {{ t('repoDetail.uploadTitle') }}
         </template>
         <a-form class="upload-form" layout="vertical">
           <a-row :gutter="16">
@@ -26,16 +28,16 @@
               <input ref="fileInput" type="file" class="file-input" @change="onFileChange" />
             </a-col>
             <a-col :xs="12" :sm="5">
-              <a-form-item label="Share with workspace">
-                <a-switch v-model="share" size="small" />
+              <a-form-item :label="t('repoDetail.shareLabel')">
+              <a-switch v-model="share" size="small" />
               </a-form-item>
             </a-col>
             <a-col :xs="12" :sm="5">
               <div class="upload-actions">
                 <a-button type="primary" :loading="uploading" @click="handleUpload">
-                  Upload
+                  {{ t('repoDetail.uploadButton') }}
                 </a-button>
-                <a-button type="text" :disabled="uploading" @click="resetForm">Reset</a-button>
+                <a-button type="text" :disabled="uploading" @click="resetForm">{{ t('repoDetail.resetButton') }}</a-button>
               </div>
             </a-col>
           </a-row>
@@ -45,7 +47,7 @@
 
       <a-card :bordered="false">
         <template #title>
-          Files
+          {{ t('repoDetail.filesTitle') }}
         </template>
         <a-table
           row-key="id"
@@ -65,7 +67,9 @@
             {{ formatSize(record.size) }}
           </template>
           <template #share="{ record }">
-            <a-tag :color="record.share ? 'arcoblue' : 'gray'">{{ record.share ? 'shared' : 'private' }}</a-tag>
+            <a-tag :color="record.share ? 'arcoblue' : 'gray'">
+              {{ t(`repoDetail.shareTag.${record.share ? 'true' : 'false'}`) }}
+            </a-tag>
           </template>
           <template #createdAt="{ record }">
             {{ formatDate(record.createdAt) }}
@@ -82,6 +86,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { isAxiosError } from 'axios';
 import { Message } from '@arco-design/web-vue';
 import { IconFile } from '@arco-design/web-vue/es/icon';
+import { useI18n } from 'vue-i18n';
 import http from '@/api/http';
 
 interface RepoItem {
@@ -114,6 +119,7 @@ interface RepoListResponse {
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const repoId = computed(() => route.params.id as string);
 
 const repo = ref<RepoItem | null>(null);
@@ -130,12 +136,12 @@ const filesPagination = computed(() => ({
   simple: true,
 }));
 
-const columns = [
-  { title: 'Name', slotName: 'name' },
-  { title: 'Size', slotName: 'size', width: 140 },
-  { title: 'Share', slotName: 'share', width: 120 },
-  { title: 'Uploaded at', slotName: 'createdAt', width: 200 },
-];
+const columns = computed(() => [
+  { title: t('repoDetail.columns.name'), slotName: 'name' },
+  { title: t('repoDetail.columns.size'), slotName: 'size', width: 140 },
+  { title: t('repoDetail.columns.share'), slotName: 'share', width: 120 },
+  { title: t('repoDetail.columns.created'), slotName: 'createdAt', width: 200 },
+]);
 
 const formatDate = (value: string) => {
   const date = new Date(value);
@@ -164,7 +170,7 @@ const goBack = () => {
 
 const ensureRepoLoaded = async () => {
   if (!repoId.value) {
-    Message.error('Invalid repository id');
+    Message.error(t('repoDetail.messages.invalidRepo'));
     goBack();
     return;
   }
@@ -173,16 +179,16 @@ const ensureRepoLoaded = async () => {
     const { data } = await http.get<RepoListResponse>('/repos');
     const found = data.data?.find((item) => item.id === repoId.value);
     if (!found) {
-      Message.error('Repository not found');
+      Message.error(t('repoDetail.messages.notFound'));
       goBack();
       return;
     }
     repo.value = found;
   } catch (error) {
     if (isAxiosError(error)) {
-      Message.error(error.response?.data?.error?.message ?? 'Failed to load repository');
+      Message.error(error.response?.data?.error?.message ?? t('repoDetail.messages.loadRepoFailed'));
     } else {
-      Message.error('Unexpected error while loading repository');
+      Message.error(t('repoDetail.messages.loadRepoUnexpected'));
     }
     goBack();
     return;
@@ -199,9 +205,9 @@ const loadFiles = async () => {
     files.value = data.data ?? [];
   } catch (error) {
     if (isAxiosError(error)) {
-      Message.error(error.response?.data?.error?.message ?? 'Failed to load files');
+      Message.error(error.response?.data?.error?.message ?? t('repoDetail.messages.loadFilesFailed'));
     } else {
-      Message.error('Unexpected error while loading files');
+      Message.error(t('repoDetail.messages.loadFilesUnexpected'));
     }
   } finally {
     filesLoading.value = false;
@@ -225,12 +231,12 @@ const onFileChange = (event: Event) => {
 
 const handleUpload = async () => {
   if (!repoId.value) {
-    Message.error('Missing repository context');
+    Message.error(t('repoDetail.messages.missingRepo'));
     return;
   }
 
   if (!selectedFile.value) {
-    Message.warning('Select a file to upload');
+    Message.warning(t('repoDetail.messages.selectFile'));
     return;
   }
 
@@ -256,14 +262,14 @@ const handleUpload = async () => {
     if (created) {
       files.value = [created, ...files.value];
     }
-    Message.success({ content: 'File uploaded successfully', duration: 2000 });
+    Message.success({ content: t('repoDetail.messages.success'), duration: 2000 });
     await loadFiles();
     resetForm();
   } catch (error) {
     if (isAxiosError(error)) {
-      Message.error(error.response?.data?.error?.message ?? 'Upload failed');
+      Message.error(error.response?.data?.error?.message ?? t('repoDetail.messages.uploadFailed'));
     } else {
-      Message.error('Unexpected error while uploading file');
+      Message.error(t('repoDetail.messages.uploadUnexpected'));
     }
   } finally {
     uploading.value = false;

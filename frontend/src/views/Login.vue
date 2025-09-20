@@ -3,27 +3,27 @@
     <a-card class="login-card" :bordered="false" hoverable>
       <template #title>
         <div class="card-title">
-          <a-typography-title :heading="4">Sign in</a-typography-title>
+          <a-typography-title :heading="4">{{ t('login.title') }}</a-typography-title>
           <a-typography-text type="secondary">
-            Access your repositories and manage files
+            {{ t('login.subtitle') }}
           </a-typography-text>
         </div>
       </template>
 
       <a-form :model="form" layout="vertical">
-        <a-form-item label="Username" field="username" :rules="usernameRules">
+        <a-form-item :label="t('login.usernameLabel')" field="username" :rules="usernameRules">
           <a-input
             v-model="form.username"
-            placeholder="Enter username"
+            :placeholder="t('login.usernamePlaceholder')"
             allow-clear
             autocomplete="username"
             @press-enter="handleSubmit"
           />
         </a-form-item>
-        <a-form-item label="Password" field="password" :rules="passwordRules">
+        <a-form-item :label="t('login.passwordLabel')" field="password" :rules="passwordRules">
           <a-input-password
             v-model="form.password"
-            placeholder="Enter password"
+            :placeholder="t('login.passwordPlaceholder')"
             allow-clear
             autocomplete="current-password"
             @press-enter="handleSubmit"
@@ -32,10 +32,10 @@
 
         <a-space direction="vertical" :size="16" class="submit-section">
           <a-button type="primary" long :loading="loading" @click="handleSubmit">
-            Login
+            {{ t('login.submit') }}
           </a-button>
           <a-typography-text type="secondary" class="hint">
-            Use the credentials provisioned by your administrator.
+            {{ t('login.hint') }}
           </a-typography-text>
         </a-space>
       </a-form>
@@ -48,6 +48,7 @@ import { reactive, ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Message } from '@arco-design/web-vue';
 import { useAuthStore } from '@/store';
+import { useI18n } from 'vue-i18n';
 
 interface LoginForm {
   username: string;
@@ -57,7 +58,7 @@ interface LoginForm {
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
-
+const { t } = useI18n();
 const form = reactive<LoginForm>({
   username: '',
   password: '',
@@ -66,11 +67,11 @@ const form = reactive<LoginForm>({
 const loading = ref(false);
 
 const usernameRules = computed(() => [
-  { required: true, message: 'Please input username' },
+  { required: true, message: t('login.messages.usernameRequired') },
 ]);
 
 const passwordRules = computed(() => [
-  { required: true, message: 'Please input password' },
+  { required: true, message: t('login.messages.passwordRequired') },
 ]);
 
 const redirectAfterLogin = () => {
@@ -85,18 +86,18 @@ const redirectAfterLogin = () => {
 
 const handleSubmit = async () => {
   if (!form.username || !form.password) {
-    Message.warning('Please fill in both username and password.');
+    Message.warning(t('login.messages.fillBoth'));
     return;
   }
 
   loading.value = true;
   try {
     await authStore.login({ ...form });
-    Message.success('Login successful');
+    Message.success(t('login.messages.success'));
     redirectAfterLogin();
   } catch (error: unknown) {
     const message =
-      (error as any)?.response?.data?.error?.message ?? 'Login failed, please try again.';
+      (error as any)?.response?.data?.error?.message ?? t('login.messages.failure');
     Message.error(message);
   } finally {
     loading.value = false;

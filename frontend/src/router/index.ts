@@ -4,39 +4,41 @@ import {
   createWebHistory,
   RouteRecordRaw,
 } from 'vue-router';
-
 import { useAuthStore } from '@/store';
+import { i18n } from '@/plugins/i18n';
+
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
     component: () => import('@/views/HomeView.vue'),
-    meta: { title: 'Search', requiresAuth: true },
+    meta: { titleKey: 'router.home', requiresAuth: true },
+
   },
   {
     path: '/repos',
     name: 'repos',
     component: () => import('@/views/ReposView.vue'),
-    meta: { title: 'Repositories', requiresAuth: true },
+    meta: { titleKey: 'router.repos', requiresAuth: true },
   },
   {
     path: '/repos/:id',
     name: 'repo-detail',
     component: () => import('@/views/RepoDetailView.vue'),
-    meta: { title: 'Repository Files', requiresAuth: true },
+    meta: { titleKey: 'router.repoDetail', requiresAuth: true },
   },
   {
     path: '/admin/users',
     name: 'admin-users',
     component: () => import('@/views/AdminUsersView.vue'),
-    meta: { title: 'User Management', requiresAuth: true, requiresAdmin: true },
+    meta: { titleKey: 'router.adminUsers', requiresAuth: true, requiresAdmin: true },
   },
   {
     path: '/login',
     name: 'login',
     component: () => import('@/views/Login.vue'),
-    meta: { title: 'Login' },
+    meta: { titleKey: 'router.login' },
   },
 ];
 
@@ -75,8 +77,11 @@ router.beforeEach((to) => {
 });
 
 router.afterEach((to) => {
-  if (typeof window !== 'undefined' && to.meta?.title) {
-    document.title = `${to.meta.title as string} - File Management`;
+  if (typeof window !== 'undefined' && to.meta?.titleKey) {
+    const titleKey = to.meta.titleKey as string;
+    const pageTitle = i18n.global.t(titleKey);
+    const appName = i18n.global.t('common.appName');
+    document.title = `${pageTitle} - ${appName}`;
   }
 });
 

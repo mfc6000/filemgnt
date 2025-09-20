@@ -3,11 +3,10 @@
     <a-space direction="vertical" :size="16" fill>
       <a-card :bordered="false">
         <template #title>
-          Your repositories
+          {{ t('repos.title') }}
         </template>
         <p class="card-description">
-          Create repositories to organize uploaded documents. These are only visible to you unless
-          shared explicitly.
+          {{ t('repos.description') }}
         </p>
         <a-divider />
         <a-form
@@ -18,10 +17,10 @@
         >
           <a-row :gutter="16">
             <a-col :xs="24" :sm="12">
-              <a-form-item label="Repository name" field="name" :validate-status="nameError || undefined">
+              <a-form-item :label="t('repos.form.nameLabel')" field="name" :validate-status="nameError || undefined">
                 <a-input
                   v-model="form.name"
-                  placeholder="e.g. Contracts"
+                  :placeholder="t('repos.form.namePlaceholder')"
                   allow-clear
                   @press-enter="handleCreate"
                 />
@@ -31,18 +30,18 @@
               </a-form-item>
             </a-col>
             <a-col :xs="24" :sm="12">
-              <a-form-item label="Visibility" field="visibility">
+              <a-form-item :label="t('repos.form.visibilityLabel')" field="visibility">
                 <a-select v-model="form.visibility">
-                  <a-option value="private">Private</a-option>
-                  <a-option value="shared">Shared</a-option>
+                  <a-option value="private">{{ t('common.visibility.private') }}</a-option>
+                  <a-option value="shared">{{ t('common.visibility.shared') }}</a-option>
                 </a-select>
               </a-form-item>
             </a-col>
             <a-col :span="24">
-              <a-form-item label="Description" field="description">
+              <a-form-item :label="t('repos.form.descriptionLabel')" field="description">
                 <a-textarea
                   v-model="form.description"
-                  placeholder="Optional note about this repository"
+                  :placeholder="t('repos.form.descriptionPlaceholder')"
                   auto-size
                   :max-length="200"
                   show-word-limit
@@ -52,7 +51,7 @@
           </a-row>
           <div class="form-actions">
             <a-button type="primary" :loading="creating" @click="handleCreate">
-              Create repository
+              {{ t('repos.form.submit') }}
             </a-button>
           </div>
         </a-form>
@@ -60,7 +59,7 @@
 
       <a-card :bordered="false">
         <template #title>
-          Repository list
+          {{ t('repos.table.title') }}
         </template>
         <a-table
           row-key="id"
@@ -72,13 +71,15 @@
           class="repo-table"
         >
           <template #visibility="{ record }">
-            <a-tag :color="record.visibility === 'shared' ? 'arcoblue' : 'gray'">{{ record.visibility }}</a-tag>
+            <a-tag :color="record.visibility === 'shared' ? 'arcoblue' : 'gray'">
+              {{ t(`common.visibility.${record.visibility}`) }}
+            </a-tag>
           </template>
           <template #createdAt="{ record }">
             {{ formatDate(record.createdAt) }}
           </template>
           <template #actions="{ record }">
-            <a-button type="text" size="mini" @click.stop="goToRepo(record)">Open</a-button>
+            <a-button type="text" size="mini" @click.stop="goToRepo(record)">{{ t('repos.table.open') }}</a-button>
           </template>
         </a-table>
       </a-card>
@@ -92,6 +93,7 @@ import { useRouter } from 'vue-router';
 import { isAxiosError } from 'axios';
 import { Message } from '@arco-design/web-vue';
 import http from '@/api/http';
+import { useI18n } from 'vue-i18n';
 
 interface RepoItem {
   id: string;
@@ -108,7 +110,7 @@ interface RepoResponse {
 }
 
 const router = useRouter();
-
+const { t } = useI18n();
 const repos = ref<RepoItem[]>([]);
 const loading = ref(false);
 const creating = ref(false);
@@ -125,13 +127,13 @@ const pagination = computed(() => ({
   simple: true,
 }));
 
-const columns = [
-  { title: 'Name', dataIndex: 'name' },
-  { title: 'Description', dataIndex: 'description' },
-  { title: 'Visibility', slotName: 'visibility', width: 140 },
-  { title: 'Created', slotName: 'createdAt', width: 200 },
-  { title: 'Actions', slotName: 'actions', width: 120 },
-];
+const columns = computed(() => [
+  { title: t('repos.table.columns.name'), dataIndex: 'name' },
+  { title: t('repos.table.columns.description'), dataIndex: 'description' },
+  { title: t('repos.table.columns.visibility'), slotName: 'visibility', width: 140 },
+  { title: t('repos.table.columns.created'), slotName: 'createdAt', width: 200 },
+  { title: t('repos.table.columns.actions'), slotName: 'actions', width: 120 },
+]);
 
 const formatDate = (value: string) => {
   const date = new Date(value);
@@ -145,9 +147,9 @@ const fetchRepos = async () => {
     repos.value = data.data ?? [];
   } catch (error) {
     if (isAxiosError(error)) {
-      Message.error(error.response?.data?.error?.message ?? 'Failed to load repositories');
+      Message.error(error.response?.data?.error?.message ?? t('repos.messages.loadFailed'));
     } else {
-      Message.error('Unexpected error while loading repositories');
+      Message.error(t('repos.messages.loadUnexpected'));
     }
   } finally {
     loading.value = false;
@@ -166,7 +168,7 @@ const handleCreate = async () => {
   const trimmed = form.name.trim();
   if (!trimmed) {
     nameError.value = 'error';
-    nameErrorMessage.value = 'Repository name is required';
+    nameErrorMessage.value = t('repos.form.validation.required');
     return;
   }
 
@@ -185,7 +187,7 @@ const handleCreate = async () => {
     if (created) {
       repos.value = [created, ...repos.value];
     }
-    Message.success({ content: `Repository "${trimmed}" created`, duration: 2000 });
+    Message.success({ content: t('repos.messages.createSuccess', { name: trimmed }), duration: 2000 });
     resetForm();
   } catch (error) {
     if (isAxiosError(error)) {
@@ -193,11 +195,11 @@ const handleCreate = async () => {
       const message = error.response?.data?.error?.message ?? error.message;
       if (status === 409) {
         nameError.value = 'error';
-        nameErrorMessage.value = 'A repository with this name already exists.';
+        nameErrorMessage.value = t('repos.form.validation.duplicate');
       }
-      Message.error(message || 'Failed to create repository');
+      Message.error(message || t('repos.messages.createFailed'));
     } else {
-      Message.error('Unexpected error while creating repository');
+      Message.error(t('repos.messages.createUnexpected'));
     }
   } finally {
     creating.value = false;

@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia';
 import http from '@/api/http';
+import type { AppLocale } from '@/locales';
+import { defaultLocale, supportedLocales } from '@/locales';
 
 export type UserRole = 'admin' | 'user';
 
@@ -21,6 +23,7 @@ interface LoginResponse {
 
 const TOKEN_KEY = 'token';
 const USER_KEY = 'auth_user';
+const LOCALE_KEY = 'app_locale';
 
 const getInitialToken = (): string => {
   if (typeof window === 'undefined') {
@@ -78,6 +81,41 @@ export const useAuthStore = defineStore('auth', {
       if (typeof window !== 'undefined') {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(USER_KEY);
+      }
+    },
+  },
+});
+
+const isSupportedLocale = (locale: string): locale is AppLocale =>
+  supportedLocales.includes(locale as AppLocale);
+
+const getInitialLocale = (): AppLocale => {
+  if (typeof window === 'undefined') {
+    return defaultLocale;
+  }
+
+  const stored = localStorage.getItem(LOCALE_KEY);
+  if (stored && isSupportedLocale(stored)) {
+    return stored;
+  }
+
+  return defaultLocale;
+};
+
+export const useLocaleStore = defineStore('locale', {
+  state: () => ({
+    locale: getInitialLocale(),
+  }),
+  actions: {
+    setLocale(nextLocale: AppLocale) {
+      if (!isSupportedLocale(nextLocale)) {
+        return;
+      }
+
+      this.locale = nextLocale;
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(LOCALE_KEY, nextLocale);
       }
     },
   },

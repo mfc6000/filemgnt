@@ -3,15 +3,14 @@
     <a-card class="search-card" :bordered="false">
       <div class="search-header">
         <div>
-          <h2>Search your workspace</h2>
+          <h2>{{ t('home.title') }}</h2>
           <p class="subtitle">
-            Enter a keyword to search synced files across your repositories. Results are scoped to your
-            access level.
+            {{ t('home.subtitle') }}
           </p>
         </div>
         <a-space class="quick-links" wrap>
-          <a-button type="text" @click="goToRepos">Manage Repositories</a-button>
-          <a-button v-if="isAdmin" type="text" @click="goToUsers">User Management</a-button>
+          <a-button type="text" @click="goToRepos">{{ t('home.manageRepos') }}</a-button>
+          <a-button v-if="isAdmin" type="text" @click="goToUsers">{{ t('home.userManagement') }}</a-button>
         </a-space>
       </div>
 
@@ -20,8 +19,8 @@
           <a-input-search
             v-model="query"
             :loading="loading"
-            placeholder="Search documents, filenames, or keywords"
-            button-text="Search"
+            :placeholder="t('home.searchPlaceholder')"
+            :button-text="t('home.searchButton')"
             size="large"
             @search="handleSearch"
           />
@@ -34,13 +33,11 @@
       <div class="results" v-if="hasSearched">
         <div class="results-meta">
           <span v-if="!errorMessage">
-            Showing {{ results.length }} result<span v-if="results.length !== 1">s</span>
-            <span v-if="source">from {{ sourceLabel }}</span>
+            {{ resultSummary }}
           </span>
-          <a-tag v-if="errorMessage" color="red">Search failed</a-tag>
+          <a-tag v-if="errorMessage" color="red">{{ t('home.tagError') }}</a-tag>
         </div>
-
-        <a-empty v-if="!loading && !errorMessage && results.length === 0" description="No results yet">
+        <a-empty v-if="!loading && !errorMessage && results.length === 0" :description="t('home.noResults')">
           <template #image>
             <IconFile class="empty-icon" />
           </template>
@@ -63,16 +60,18 @@
               <div class="result-item">
                 <div class="result-title">
                   <IconFile class="result-icon" />
-                  <a-typography-text strong>{{ item.title || item.name || 'Untitled document' }}</a-typography-text>
-                  <a-tag v-if="item.repoId" size="small">Repo: {{ item.repoId }}</a-tag>
+                  <a-typography-text strong>{{ item.title || item.name || t('home.untitled') }}</a-typography-text>
+                  <a-tag v-if="item.repoId" size="small">{{ t('home.repoLabel', { id: item.repoId }) }}</a-tag>
                 </div>
                 <a-typography-paragraph v-if="item.snippet" class="snippet" ellipsis :rows="2">
                   {{ item.snippet }}
                 </a-typography-paragraph>
                 <div class="result-meta">
-                  <span v-if="item.score !== undefined && item.score !== null">Score: {{ item.score.toFixed(2) }}</span>
-                  <span v-if="item.fileId">File ID: {{ item.fileId }}</span>
-                  <span v-if="item.documentId">Document ID: {{ item.documentId }}</span>
+                  <span v-if="item.score !== undefined && item.score !== null">
+                    {{ t('home.scoreLabel', { score: item.score.toFixed(2) }) }}
+                  </span>
+                  <span v-if="item.fileId">{{ t('home.fileId', { id: item.fileId }) }}</span>
+                  <span v-if="item.documentId">{{ t('home.documentId', { id: item.documentId }) }}</span>
                 </div>
               </div>
             </a-list-item>
@@ -89,6 +88,7 @@ import { useRouter } from 'vue-router';
 import { isAxiosError } from 'axios';
 import { Message } from '@arco-design/web-vue';
 import { IconFile } from '@arco-design/web-vue/es/icon';
+import { useI18n } from 'vue-i18n';
 import http from '@/api/http';
 import { useAuthStore } from '@/store';
 
@@ -110,7 +110,7 @@ interface SearchResponse {
 
 const router = useRouter();
 const authStore = useAuthStore();
-
+const { t } = useI18n();
 const isAdmin = computed(() => authStore.isAdmin);
 const query = ref('');
 const queryError = ref('');
@@ -124,7 +124,16 @@ const sourceLabel = computed(() => {
   if (!source.value) {
     return '';
   }
-  return source.value === 'dify' ? 'Dify Knowledge Base' : 'local index';
+  const key = source.value === 'dify' ? 'home.sources.dify' : 'home.sources.local';
+  return t(key);
+});
+
+const resultSummary = computed(() => {
+  const base = t('home.resultsCount', { count: results.length });
+  if (!source.value) {
+    return base;
+  }
+  return `${base}${t('home.resultsFrom', { source: sourceLabel.value })}`;
 });
 
 const goToRepos = () => {
@@ -138,7 +147,7 @@ const goToUsers = () => {
 const handleSearch = async () => {
   const trimmed = query.value.trim();
   if (!trimmed) {
-    queryError.value = 'Please enter a keyword to search';
+    queryError.value = t('home.validation.required');
     return;
   }
 
@@ -157,9 +166,9 @@ const handleSearch = async () => {
   } catch (error) {
     if (isAxiosError(error)) {
       const message = error.response?.data?.error?.message ?? error.message;
-      errorMessage.value = message || 'Search failed. Please try again later.';
+      errorMessage.value = message || t('home.messages.failed');
     } else {
-      errorMessage.value = 'Unexpected error occurred while searching.';
+      errorMessage.value = t('home.messages.unexpected');
     }
     results.splice(0, results.length);
   } finally {
@@ -167,7 +176,7 @@ const handleSearch = async () => {
   }
 
   if (!errorMessage.value) {
-    Message.success({ content: `Search completed for "${trimmed}"`, duration: 2000 });
+    Message.success({ content: t('home.messages.success', { query: trimmed }), duration: 2000 });
   }
 };
 </script>

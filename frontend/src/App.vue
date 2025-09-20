@@ -2,21 +2,28 @@
   <a-layout class="app-shell">
     <a-layout-header class="app-header">
       <div class="brand" role="button" tabindex="0" @click="goHome" @keyup.enter="goHome">
-        <a-typography-title :heading="5">File Management</a-typography-title>
-        <span class="tagline">Organize, search, and share securely</span>
+        <a-typography-title :heading="5">{{ t('common.appName') }}</a-typography-title>
+        <span class="tagline">{{ t('common.tagline') }}</span>
       </div>
       <div class="header-actions">
         <a-space :size="12" align="center">
+          <a-select
+            v-model="selectedLocale"
+            size="small"
+            class="locale-select"
+            :options="localeSelectOptions"
+            :style="{ minWidth: '104px' }"
+          />
           <template v-if="isAuthenticated">
             <a-typography-text class="welcome-text">
-              Hello, <strong>{{ username }}</strong>
+              {{ t('common.greeting', { name: username }) }}
             </a-typography-text>
-            <a-tag v-if="isAdmin" color="orangered" bordered>Admin</a-tag>
-            <a-button type="outline" size="small" @click="handleLogout">Logout</a-button>
+            <a-tag v-if="isAdmin" color="orangered" bordered>{{ t('common.adminTag') }}</a-tag>
+            <a-button type="outline" size="small" @click="handleLogout">{{ t('common.logout') }}</a-button>
           </template>
           <template v-else>
-            <a-button type="text" class="header-link" @click="openDocs">Docs</a-button>
-            <a-button type="primary" shape="round" @click="goLogin">Login</a-button>
+            <a-button type="text" class="header-link" @click="openDocs">{{ t('common.docs') }}</a-button>
+            <a-button type="primary" shape="round" @click="goLogin">{{ t('common.login') }}</a-button>
           </template>
         </a-space>
       </div>
@@ -30,14 +37,31 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/store';
+import { useI18n } from 'vue-i18n';
+import { useAuthStore, useLocaleStore } from '@/store';
+import { localeOptions } from '@/locales';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const localeStore = useLocaleStore();
+const { t } = useI18n();
+
 
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 const isAdmin = computed(() => authStore.isAdmin);
 const username = computed(() => authStore.user?.username ?? '');
+
+const selectedLocale = computed({
+  get: () => localeStore.locale,
+  set: (value) => localeStore.setLocale(value),
+});
+
+const localeSelectOptions = computed(() =>
+  localeOptions.map((option) => ({
+    value: option.value,
+    label: t(option.labelKey),
+  })),
+);
 
 const goLogin = () => {
   router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } });
@@ -99,6 +123,10 @@ const openDocs = () => {
 .header-actions {
   display: flex;
   align-items: center;
+}
+
+.locale-select {
+  min-width: 104px;
 }
 
 .header-link {

@@ -3,11 +3,10 @@
     <a-space direction="vertical" :size="16" fill>
       <a-card :bordered="false">
         <template #title>
-          User management
+          {{ t('adminUsers.title') }}
         </template>
         <p class="card-description">
-          Administrators can create new accounts, toggle roles, and deactivate users. Password delivery
-          should follow your security policy.
+          {{ t('adminUsers.description') }}
         </p>
         <a-divider />
         <a-form
@@ -18,10 +17,10 @@
         >
           <a-row :gutter="16">
             <a-col :xs="24" :sm="12">
-              <a-form-item label="Username" field="username" :validate-status="usernameStatus || undefined">
+              <a-form-item :label="t('adminUsers.form.usernameLabel')" field="username" :validate-status="usernameStatus || undefined">
                 <a-input
                   v-model="form.username"
-                  placeholder="e.g. alice"
+                  :placeholder="t('adminUsers.form.usernamePlaceholder')"
                   allow-clear
                   @press-enter="handleCreate"
                 />
@@ -31,28 +30,28 @@
               </a-form-item>
             </a-col>
             <a-col :xs="24" :sm="12">
-              <a-form-item label="Display name" field="displayName">
+              <a-form-item :label="t('adminUsers.form.displayNameLabel')" field="displayName">
                 <a-input
                   v-model="form.displayName"
-                  placeholder="Alice Johnson"
+                  :placeholder="t('adminUsers.form.displayNamePlaceholder')"
                   allow-clear
                   @press-enter="handleCreate"
                 />
               </a-form-item>
             </a-col>
             <a-col :xs="24" :sm="12">
-              <a-form-item label="Role" field="role">
+              <a-form-item :label="t('adminUsers.form.roleLabel')" field="role">
                 <a-select v-model="form.role">
-                  <a-option value="user">User</a-option>
-                  <a-option value="admin">Admin</a-option>
+                  <a-option value="user">{{ t('common.roles.user') }}</a-option>
+                  <a-option value="admin">{{ t('common.roles.admin') }}</a-option>
                 </a-select>
               </a-form-item>
             </a-col>
             <a-col :xs="24" :sm="12">
-              <a-form-item label="Temporary password" field="password">
+              <a-form-item :label="t('adminUsers.form.passwordLabel')" field="password">
                 <a-input-password
                   v-model="form.password"
-                  placeholder="Optional initial password"
+                  :placeholder="t('adminUsers.form.passwordPlaceholder')"
                   allow-clear
                   @press-enter="handleCreate"
                 />
@@ -61,7 +60,7 @@
           </a-row>
           <div class="form-actions">
             <a-button type="primary" :loading="creating" @click="handleCreate">
-              Create user
+              {{ t('adminUsers.form.submit') }}
             </a-button>
           </div>
         </a-form>
@@ -69,7 +68,7 @@
 
       <a-card :bordered="false">
         <template #title>
-          Users
+          {{ t('adminUsers.table.title') }}
         </template>
         <a-table
           row-key="id"
@@ -80,10 +79,14 @@
           class="users-table"
         >
           <template #role="{ record }">
-            <a-tag :color="record.role === 'admin' ? 'orangered' : 'arcoblue'">{{ record.role }}</a-tag>
+            <a-tag :color="record.role === 'admin' ? 'orangered' : 'arcoblue'">
+              {{ t(`common.roles.${record.role}`) }}
+            </a-tag>
           </template>
           <template #status="{ record }">
-            <a-tag :color="record.isActive ? 'green' : 'gray'">{{ record.isActive ? 'active' : 'inactive' }}</a-tag>
+            <a-tag :color="record.isActive ? 'green' : 'gray'">
+              {{ record.isActive ? t('common.status.active') : t('common.status.inactive') }}
+            </a-tag>
           </template>
           <template #updatedAt="{ record }">
             {{ formatDate(record.updatedAt) }}
@@ -91,10 +94,10 @@
           <template #actions="{ record }">
             <a-space :size="8">
               <a-button type="text" size="mini" @click="toggleRole(record)">
-                {{ record.role === 'admin' ? 'Set as user' : 'Make admin' }}
+                {{ record.role === 'admin' ? t('adminUsers.table.actions.setUser') : t('adminUsers.table.actions.makeAdmin') }}
               </a-button>
               <a-button type="text" size="mini" status="danger" @click="confirmDeactivate(record)">
-                {{ record.isActive ? 'Deactivate' : 'Delete' }}
+                {{ record.isActive ? t('adminUsers.table.actions.deactivate') : t('adminUsers.table.actions.delete') }}
               </a-button>
             </a-space>
           </template>
@@ -109,6 +112,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { isAxiosError } from 'axios';
 import { Message, Modal } from '@arco-design/web-vue';
 import http from '@/api/http';
+import { useI18n } from 'vue-i18n';
 
 interface AdminUserItem {
   id: string;
@@ -125,6 +129,7 @@ interface UsersResponse {
   data: AdminUserItem[];
 }
 
+const { t } = useI18n();
 const users = ref<AdminUserItem[]>([]);
 const loading = ref(false);
 const creating = ref(false);
@@ -147,14 +152,15 @@ const formatDate = (value: string) => {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 };
 
-const columns = [
-  { title: 'Username', dataIndex: 'username' },
-  { title: 'Display name', dataIndex: 'displayName' },
-  { title: 'Role', slotName: 'role', width: 120 },
-  { title: 'Status', slotName: 'status', width: 120 },
-  { title: 'Updated', slotName: 'updatedAt', width: 200 },
-  { title: 'Actions', slotName: 'actions', width: 200 },
-];
+
+const columns = computed(() => [
+  { title: t('adminUsers.table.columns.username'), dataIndex: 'username' },
+  { title: t('adminUsers.table.columns.displayName'), dataIndex: 'displayName' },
+  { title: t('adminUsers.table.columns.role'), slotName: 'role', width: 120 },
+  { title: t('adminUsers.table.columns.status'), slotName: 'status', width: 120 },
+  { title: t('adminUsers.table.columns.updated'), slotName: 'updatedAt', width: 200 },
+  { title: t('adminUsers.table.columns.actions'), slotName: 'actions', width: 200 },
+]);
 
 const fetchUsers = async () => {
   loading.value = true;
@@ -163,9 +169,9 @@ const fetchUsers = async () => {
     users.value = data.data ?? [];
   } catch (error) {
     if (isAxiosError(error)) {
-      Message.error(error.response?.data?.error?.message ?? 'Failed to load users');
+      Message.error(error.response?.data?.error?.message ?? t('adminUsers.messages.loadFailed'));
     } else {
-      Message.error('Unexpected error while loading users');
+      Message.error(t('adminUsers.messages.loadUnexpected'));
     }
   } finally {
     loading.value = false;
@@ -185,7 +191,7 @@ const handleCreate = async () => {
   const trimmed = form.username.trim();
   if (!trimmed) {
     usernameStatus.value = 'error';
-    usernameErrorMessage.value = 'Username is required';
+    usernameErrorMessage.value = t('adminUsers.form.validation.usernameRequired');
     return;
   }
 
@@ -205,18 +211,18 @@ const handleCreate = async () => {
     if (created) {
       users.value = [created, ...users.value];
     }
-    Message.success({ content: `User "${trimmed}" created`, duration: 2000 });
+    Message.success({ content: t('adminUsers.messages.createSuccess', { username: trimmed }), duration: 2000 });
     resetForm();
   } catch (error) {
     if (isAxiosError(error)) {
       const message = error.response?.data?.error?.message ?? error.message;
       if (error.response?.status === 409) {
         usernameStatus.value = 'error';
-        usernameErrorMessage.value = 'Username already exists';
+        usernameErrorMessage.value = t('adminUsers.form.validation.usernameExists');
       }
-      Message.error(message || 'Failed to create user');
+      Message.error(message || t('adminUsers.messages.createFailed'));
     } else {
-      Message.error('Unexpected error while creating user');
+      Message.error(t('adminUsers.messages.createUnexpected'));
     }
   } finally {
     creating.value = false;
@@ -228,22 +234,32 @@ const toggleRole = async (record: AdminUserItem) => {
   try {
     await http.put(`/admin/users/${record.id}`, { role: nextRole });
     record.role = nextRole;
-    Message.success({ content: `Role updated to ${nextRole}`, duration: 1500 });
+    Message.success({
+      content: t('adminUsers.messages.roleUpdated', { role: t(`common.roles.${nextRole}`) }),
+      duration: 1500,
+    });
   } catch (error) {
     if (isAxiosError(error)) {
-      Message.error(error.response?.data?.error?.message ?? 'Failed to update role');
+      Message.error(error.response?.data?.error?.message ?? t('adminUsers.messages.roleFailed'));
     } else {
-      Message.error('Unexpected error while updating role');
+      Message.error(t('adminUsers.messages.roleUnexpected'));
     }
   }
 };
 
 const confirmDeactivate = (record: AdminUserItem) => {
+  const title = record.isActive ? t('adminUsers.confirm.deactivateTitle') : t('adminUsers.confirm.deleteTitle');
+  const content = record.isActive
+    ? t('adminUsers.confirm.deactivateMessage', { username: record.username })
+    : t('adminUsers.confirm.deleteMessage', { username: record.username });
+  const okText = record.isActive ? t('adminUsers.confirm.deactivateAction') : t('adminUsers.confirm.deleteAction');
+
   Modal.confirm({
-    title: record.isActive ? 'Deactivate user?' : 'Delete user?',
-    content: `Are you sure you want to ${record.isActive ? 'deactivate' : 'remove'} ${record.username}?`,
-    okText: record.isActive ? 'Deactivate' : 'Remove',
+    title,
+    content,
+    okText,
     okButtonProps: { status: 'danger' },
+    cancelText: t('common.actions.cancel'),
     onOk: () => deactivateUser(record),
   });
 };
@@ -252,12 +268,12 @@ const deactivateUser = async (record: AdminUserItem) => {
   try {
     await http.delete(`/admin/users/${record.id}`);
     users.value = users.value.filter((user) => user.id !== record.id);
-    Message.success({ content: 'User removed', duration: 1500 });
+    Message.success({ content: t('adminUsers.messages.removeSuccess'), duration: 1500 });
   } catch (error) {
     if (isAxiosError(error)) {
-      Message.error(error.response?.data?.error?.message ?? 'Failed to remove user');
+      Message.error(error.response?.data?.error?.message ?? t('adminUsers.messages.removeFailed'));
     } else {
-      Message.error('Unexpected error while removing user');
+      Message.error(t('adminUsers.messages.removeUnexpected'));
     }
   }
 };
