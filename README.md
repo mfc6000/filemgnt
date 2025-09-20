@@ -94,6 +94,7 @@ Vite serves the SPA on `http://localhost:5173` with hot module replacement. The 
 
 ### 6. Exercise Dify integration (optional)
 
+
 If you have Dify credentials, populate `DIFY_BASE_URL`, `DIFY_KB_ID`, and `DIFY_API_KEY` in `.env`, restart the backend, and re-upload a file. The backend streams uploads into Dify, records the returned `difyDocId`, and triggers an index refresh so the document becomes searchable. Failures are logged but do not block local persistence. Without credentials the system falls back to fuzzy matching over local filenames.
 
 ### 7. Run automated checks
@@ -169,3 +170,7 @@ frontend/             # Vue 3 + Vite scaffold
 ```
 
 Refer to the documents inside `doc/` for acceptance criteria, architecture notes, and upgrade guidance.
+
+## Notes and Comments
+👉 [WSL Node.js Guide](doc/wsl_node_nodemon_guide.md)
+

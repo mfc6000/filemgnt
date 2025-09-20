@@ -62,12 +62,12 @@ async function uploadFile(repo, user, file, options = {}) {
     if (difyDocId) {
       metadata.difyDocId = difyDocId;
       await db.write();
-
       try {
         await refreshDifyDocument(difyDocId);
       } catch (refreshError) {
         console.warn('Dify document refresh failed:', refreshError.message);
       }
+
     }
   } catch (error) {
     console.warn('Failed to upload document to Dify:', error.message);

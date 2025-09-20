@@ -31,7 +31,6 @@ function ensureConfigured() {
 
 async function uploadToDify(filePath, fileName) {
   const { baseUrl, kbId, apiKey } = ensureConfigured();
-
   const absolutePath = path.isAbsolute(filePath)
     ? filePath
     : path.join(process.cwd(), filePath);
