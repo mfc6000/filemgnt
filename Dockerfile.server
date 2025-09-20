@@ -1,0 +1,17 @@
+# syntax=docker/dockerfile:1
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install --production --no-audit --no-fund
+
+COPY src ./src
+COPY db.json ./db.json
+COPY uploads ./uploads
+
+ENV NODE_ENV=production
+ENV PORT=5175
+EXPOSE 5175
+
+CMD ["npm", "start"]
