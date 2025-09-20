@@ -37,7 +37,9 @@
                 <a-button type="primary" :loading="uploading" @click="handleUpload">
                   {{ t('repoDetail.uploadButton') }}
                 </a-button>
-                <a-button type="text" :disabled="uploading" @click="resetForm">{{ t('repoDetail.resetButton') }}</a-button>
+                <a-button type="text" :disabled="uploading" @click="resetForm">{{
+                  t('repoDetail.resetButton')
+                }}</a-button>
               </div>
             </a-col>
           </a-row>
@@ -58,10 +60,10 @@
           class="files-table"
         >
           <template #name="{ record }">
-              <div class="file-name">
-                <IconFile class="file-icon" />
-                <span>{{ record.name }}</span>
-              </div>
+            <div class="file-name">
+              <IconFile class="file-icon" />
+              <span>{{ record.name }}</span>
+            </div>
           </template>
           <template #size="{ record }">
             {{ formatSize(record.size) }}
@@ -118,6 +120,8 @@ interface FileItem {
   createdAt: string;
   storagePath: string;
   difyDocId?: string;
+  difySyncStatus?: 'pending' | 'succeeded' | 'failed' | 'skipped';
+  difySyncError?: string;
 }
 
 interface FilesResponse {
@@ -190,7 +194,7 @@ const ensureRepoLoaded = async () => {
 
   try {
     const { data } = await http.get<RepoListResponse>('/repos');
-    const found = data.data?.find((item) => item.id === repoId.value);
+    const found = data.data?.find(item => item.id === repoId.value);
     if (!found) {
       Message.error(t('repoDetail.messages.notFound'));
       goBack();
@@ -199,7 +203,9 @@ const ensureRepoLoaded = async () => {
     repo.value = found;
   } catch (error) {
     if (isAxiosError(error)) {
-      Message.error(error.response?.data?.error?.message ?? t('repoDetail.messages.loadRepoFailed'));
+      Message.error(
+        error.response?.data?.error?.message ?? t('repoDetail.messages.loadRepoFailed')
+      );
     } else {
       Message.error(t('repoDetail.messages.loadRepoUnexpected'));
     }
@@ -218,7 +224,9 @@ const loadFiles = async () => {
     files.value = data.data ?? [];
   } catch (error) {
     if (isAxiosError(error)) {
-      Message.error(error.response?.data?.error?.message ?? t('repoDetail.messages.loadFilesFailed'));
+      Message.error(
+        error.response?.data?.error?.message ?? t('repoDetail.messages.loadFilesFailed')
+      );
     } else {
       Message.error(t('repoDetail.messages.loadFilesUnexpected'));
     }
@@ -262,7 +270,7 @@ const handleUpload = async () => {
 
   try {
     const { data } = await http.post(`/repos/${repoId.value}/files`, formData, {
-      onUploadProgress: (event) => {
+      onUploadProgress: event => {
         if (!event.total) {
           return;
         }
@@ -275,6 +283,15 @@ const handleUpload = async () => {
       files.value = [created, ...files.value];
     }
     Message.success({ content: t('repoDetail.messages.success'), duration: 2000 });
+    if (created?.difySyncStatus === 'failed') {
+      const reason = created.difySyncError?.trim();
+      Message.warning({
+        content: reason
+          ? t('repoDetail.messages.difySyncFailedWithReason', { reason })
+          : t('repoDetail.messages.difySyncFailed'),
+        duration: 4000,
+      });
+    }
     await loadFiles();
     resetForm();
   } catch (error) {
@@ -298,8 +315,11 @@ const performDelete = async (file: FileItem) => {
   deletingId.value = file.id;
   try {
     await http.delete(`/repos/${repoId.value}/files/${file.id}`);
-    files.value = files.value.filter((item) => item.id !== file.id);
-    Message.success({ content: t('repoDetail.messages.deleteSuccess', { name: file.name }), duration: 1500 });
+    files.value = files.value.filter(item => item.id !== file.id);
+    Message.success({
+      content: t('repoDetail.messages.deleteSuccess', { name: file.name }),
+      duration: 1500,
+    });
   } catch (error) {
     if (isAxiosError(error)) {
       Message.error(error.response?.data?.error?.message ?? t('repoDetail.messages.deleteFailed'));

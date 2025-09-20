@@ -145,9 +145,8 @@ export const messages = {
         uploadFailed: '上传失败',
         uploadUnexpected: '上传文件时发生未知错误',
         success: '文件上传成功',
-        deleteSuccess: '已删除文件“{name}”',
-        deleteFailed: '删除文件失败',
-        deleteUnexpected: '删除文件时发生未知错误',
+        difySyncFailed: '文件已上传，但同步至 Dify 知识库失败。',
+        difySyncFailedWithReason: '文件已上传，但同步至 Dify 知识库失败：{reason}',
       },
     },
     adminUsers: {
@@ -272,7 +271,8 @@ export const messages = {
     },
     home: {
       title: 'Search your workspace',
-      subtitle: 'Enter a keyword to search synced files across repositories. Results respect your access level.',
+      subtitle:
+        'Enter a keyword to search synced files across repositories. Results respect your access level.',
       manageRepos: 'Manage repositories',
       userManagement: 'User management',
       searchPlaceholder: 'Search documents, filenames, or keywords',
@@ -301,7 +301,8 @@ export const messages = {
     },
     repos: {
       title: 'Your repositories',
-      description: 'Create repositories to organize uploaded documents. They stay private unless shared.',
+      description:
+        'Create repositories to organize uploaded documents. They stay private unless shared.',
       form: {
         nameLabel: 'Repository name',
         namePlaceholder: 'e.g. Contracts',
@@ -377,14 +378,15 @@ export const messages = {
         uploadFailed: 'Upload failed',
         uploadUnexpected: 'Unexpected error while uploading file',
         success: 'File uploaded successfully',
-        deleteSuccess: 'Deleted “{name}”',
-        deleteFailed: 'Failed to delete file',
-        deleteUnexpected: 'Unexpected error while deleting file',
+        difySyncFailed: 'File uploaded, but syncing to the Dify knowledge base failed.',
+        difySyncFailedWithReason:
+          'File uploaded, but syncing to the Dify knowledge base failed: {reason}',
       },
     },
     adminUsers: {
       title: 'User management',
-      description: 'Administrators can create accounts, toggle roles, and deactivate users. Follow your security policy for password delivery.',
+      description:
+        'Administrators can create accounts, toggle roles, and deactivate users. Follow your security policy for password delivery.',
       form: {
         usernameLabel: 'Username',
         usernamePlaceholder: 'e.g. alice',

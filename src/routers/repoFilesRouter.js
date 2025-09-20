@@ -30,9 +30,8 @@ const allowedMimeTypes = new Set([
 ]);
 
 const configuredMax = Number(process.env.UPLOAD_MAX_BYTES);
-const maxUploadBytes = Number.isFinite(configuredMax) && configuredMax > 0
-  ? configuredMax
-  : 10 * 1024 * 1024;
+const maxUploadBytes =
+  Number.isFinite(configuredMax) && configuredMax > 0 ? configuredMax : 10 * 1024 * 1024;
 
 function createError(status, code, message) {
   const error = new Error(message);
@@ -104,7 +103,7 @@ router.post(
   '/:repoId/files',
   ensureRepoAccess,
   (req, res, next) => {
-    upload.single('file')(req, res, (error) => {
+    upload.single('file')(req, res, error => {
       if (!error) {
         next();
         return;

@@ -9,15 +9,14 @@
           {{ t('repos.description') }}
         </p>
         <a-divider />
-        <a-form
-          layout="vertical"
-          class="repo-form"
-          :model="form"
-          :disabled="creating"
-        >
+        <a-form layout="vertical" class="repo-form" :model="form" :disabled="creating">
           <a-row :gutter="16">
             <a-col :xs="24" :sm="12">
-              <a-form-item :label="t('repos.form.nameLabel')" field="name" :validate-status="nameError || undefined">
+              <a-form-item
+                :label="t('repos.form.nameLabel')"
+                field="name"
+                :validate-status="nameError || undefined"
+              >
                 <a-input
                   v-model="form.name"
                   :placeholder="t('repos.form.namePlaceholder')"
@@ -79,7 +78,9 @@
             {{ formatDate(record.createdAt) }}
           </template>
           <template #actions="{ record }">
-            <a-button type="text" size="mini" @click.stop="goToRepo(record)">{{ t('repos.table.open') }}</a-button>
+            <a-button type="text" size="mini" @click.stop="goToRepo(record)">{{
+              t('repos.table.open')
+            }}</a-button>
           </template>
         </a-table>
       </a-card>
@@ -187,7 +188,10 @@ const handleCreate = async () => {
     if (created) {
       repos.value = [created, ...repos.value];
     }
-    Message.success({ content: t('repos.messages.createSuccess', { name: trimmed }), duration: 2000 });
+    Message.success({
+      content: t('repos.messages.createSuccess', { name: trimmed }),
+      duration: 2000,
+    });
     resetForm();
   } catch (error) {
     if (isAxiosError(error)) {

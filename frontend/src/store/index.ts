@@ -58,8 +58,8 @@ export const useAuthStore = defineStore('auth', {
     token: getInitialToken(),
   }),
   getters: {
-    isAuthenticated: (state) => Boolean(state.token),
-    isAdmin: (state) => state.user?.role === 'admin',
+    isAuthenticated: state => Boolean(state.token),
+    isAdmin: state => state.user?.role === 'admin',
   },
   actions: {
     async login(payload: LoginPayload) {

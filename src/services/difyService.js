@@ -43,9 +43,7 @@ function ensureConfigured() {
 
 async function uploadToDify(filePath, fileName) {
   const { baseUrl, kbId, apiKey } = ensureConfigured();
-  const absolutePath = path.isAbsolute(filePath)
-    ? filePath
-    : path.join(process.cwd(), filePath);
+  const absolutePath = path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
 
   await fs.promises.access(absolutePath, fs.constants.R_OK);
   const buffer = await fs.promises.readFile(absolutePath);

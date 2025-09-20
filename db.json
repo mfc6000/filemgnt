@@ -64,6 +64,19 @@
       "createdAt": "2024-01-05T09:30:00.000Z",
       "storagePath": "uploads/repo-demo-001/notes.md",
       "difyDocId": null
+    },
+    {
+      "id": "e22d6f21-c0a9-4fe1-abd0-cd1b9f3fd299",
+      "repoId": "4be0d853-e618-4006-8e60-80b86d50af8a",
+      "uploaderId": "admin",
+      "name": "CG China Michelin Tester Shen Quan 2025Q4_20250915.docx",
+      "size": 2490878,
+      "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "share": false,
+      "createdAt": "2025-09-20T09:16:24.198Z",
+      "storagePath": "uploads/84f87367-5c45-4c7a-a403-a55292b289dd.docx",
+      "difySyncStatus": "failed",
+      "difySyncError": "fetch failed"
     }
   ]
 }

@@ -9,15 +9,14 @@
           {{ t('adminUsers.description') }}
         </p>
         <a-divider />
-        <a-form
-          layout="vertical"
-          class="user-form"
-          :model="form"
-          :disabled="creating"
-        >
+        <a-form layout="vertical" class="user-form" :model="form" :disabled="creating">
           <a-row :gutter="16">
             <a-col :xs="24" :sm="12">
-              <a-form-item :label="t('adminUsers.form.usernameLabel')" field="username" :validate-status="usernameStatus || undefined">
+              <a-form-item
+                :label="t('adminUsers.form.usernameLabel')"
+                field="username"
+                :validate-status="usernameStatus || undefined"
+              >
                 <a-input
                   v-model="form.username"
                   :placeholder="t('adminUsers.form.usernamePlaceholder')"
@@ -94,10 +93,18 @@
           <template #actions="{ record }">
             <a-space :size="8">
               <a-button type="text" size="mini" @click="toggleRole(record)">
-                {{ record.role === 'admin' ? t('adminUsers.table.actions.setUser') : t('adminUsers.table.actions.makeAdmin') }}
+                {{
+                  record.role === 'admin'
+                    ? t('adminUsers.table.actions.setUser')
+                    : t('adminUsers.table.actions.makeAdmin')
+                }}
               </a-button>
               <a-button type="text" size="mini" status="danger" @click="confirmDeactivate(record)">
-                {{ record.isActive ? t('adminUsers.table.actions.deactivate') : t('adminUsers.table.actions.delete') }}
+                {{
+                  record.isActive
+                    ? t('adminUsers.table.actions.deactivate')
+                    : t('adminUsers.table.actions.delete')
+                }}
               </a-button>
             </a-space>
           </template>
@@ -211,7 +218,10 @@ const handleCreate = async () => {
     if (created) {
       users.value = [created, ...users.value];
     }
-    Message.success({ content: t('adminUsers.messages.createSuccess', { username: trimmed }), duration: 2000 });
+    Message.success({
+      content: t('adminUsers.messages.createSuccess', { username: trimmed }),
+      duration: 2000,
+    });
     resetForm();
   } catch (error) {
     if (isAxiosError(error)) {
@@ -248,11 +258,15 @@ const toggleRole = async (record: AdminUserItem) => {
 };
 
 const confirmDeactivate = (record: AdminUserItem) => {
-  const title = record.isActive ? t('adminUsers.confirm.deactivateTitle') : t('adminUsers.confirm.deleteTitle');
+  const title = record.isActive
+    ? t('adminUsers.confirm.deactivateTitle')
+    : t('adminUsers.confirm.deleteTitle');
   const content = record.isActive
     ? t('adminUsers.confirm.deactivateMessage', { username: record.username })
     : t('adminUsers.confirm.deleteMessage', { username: record.username });
-  const okText = record.isActive ? t('adminUsers.confirm.deactivateAction') : t('adminUsers.confirm.deleteAction');
+  const okText = record.isActive
+    ? t('adminUsers.confirm.deactivateAction')
+    : t('adminUsers.confirm.deleteAction');
 
   Modal.confirm({
     title,
@@ -267,7 +281,7 @@ const confirmDeactivate = (record: AdminUserItem) => {
 const deactivateUser = async (record: AdminUserItem) => {
   try {
     await http.delete(`/admin/users/${record.id}`);
-    users.value = users.value.filter((user) => user.id !== record.id);
+    users.value = users.value.filter(user => user.id !== record.id);
     Message.success({ content: t('adminUsers.messages.removeSuccess'), duration: 1500 });
   } catch (error) {
     if (isAxiosError(error)) {
