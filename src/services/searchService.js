@@ -183,6 +183,14 @@ async function search(user, query, options = {}) {
         timeoutMs: options.timeoutMs,
       });
     } catch (error) {
+      console.error('[Search] Dify search failed', {
+        message: error.message,
+        status: error.status,
+        code: error.code,
+        url: error.url,
+        body: error.body,
+        stack: error.stack,
+      });
       const err = error;
       err.status = err.status || 502;
       err.code = err.code || 'DIFY_SEARCH_FAILED';

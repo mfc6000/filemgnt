@@ -9,6 +9,15 @@ function createDifyError(status, code, message) {
   return error;
 }
 
+function logDifyError(context, details) {
+  try {
+    const meta = typeof details === 'object' ? details : { details };
+    console.error(`[Dify] ${context}`, meta);
+  } catch (loggingError) {
+    console.error(`[Dify] ${context} (failed to log details)`, loggingError);
+  }
+}
+
 function normalizeBaseUrl(url) {
   if (!url) return '';
   const trimmed = url.trim();
@@ -40,6 +49,12 @@ function ensureConfigured() {
   const config = getDifyConfig();
 
   if (!config.isConfigured) {
+    logDifyError('Missing configuration', {
+      baseUrl: config.baseUrl || null,
+      apiBaseUrl: config.apiBaseUrl || null,
+      kbId: config.kbId || null,
+      hasApiKey: Boolean(config.apiKey),
+    });
     throw createDifyError(
       500,
       'DIFY_NOT_CONFIGURED',
@@ -72,6 +87,11 @@ async function uploadToDify(filePath, fileName) {
 
   if (!response.ok) {
     const text = await response.text();
+    logDifyError('Upload failed', {
+      status: response.status,
+      url: `${apiBaseUrl}/datasets/${kbId}/document/create-by-file`,
+      body: text,
+    });
     throw createDifyError(
       response.status,
       'DIFY_UPLOAD_FAILED',
@@ -103,7 +123,6 @@ async function refreshDifyDocument(documentId) {
   }
 
   const { apiBaseUrl, kbId, apiKey } = ensureConfigured();
-
   const response = await fetch(
     `${apiBaseUrl}/datasets/${kbId}/documents/${documentId}/indexing-status`,
     {
@@ -120,6 +139,12 @@ async function refreshDifyDocument(documentId) {
 
   if (!response.ok) {
     const text = await response.text();
+    logDifyError('Indexing status fetch failed', {
+      status: response.status,
+      url: `${apiBaseUrl}/datasets/${kbId}/documents/${documentId}/indexing-status`,
+      body: text,
+    });
+
     throw createDifyError(
       response.status,
       'DIFY_REFRESH_FAILED',
@@ -155,6 +180,11 @@ async function deleteDifyDocument(documentId) {
 
   if (!response.ok) {
     const text = await response.text();
+    logDifyError('Document deletion failed', {
+      status: response.status,
+      url: `${apiBaseUrl}/datasets/${kbId}/documents/${documentId}`,
+      body: text,
+    });
     throw createDifyError(
       response.status,
       'DIFY_DELETE_FAILED',
@@ -169,18 +199,22 @@ async function retrieveChunks(options = {}) {
   const { baseUrl, apiKey, datasetId, query, retrievalModel, timeoutMs = 15000 } = options;
 
   if (!baseUrl) {
+    logDifyError('Retrieve called without baseUrl', { datasetId, query });
     throw createDifyError(500, 'DIFY_BASE_URL_MISSING', 'Dify baseUrl is required.');
   }
 
   if (!apiKey) {
+    logDifyError('Retrieve called without apiKey', { datasetId, query });
     throw createDifyError(500, 'DIFY_API_KEY_MISSING', 'Dify API key is required.');
   }
 
   if (!datasetId) {
+    logDifyError('Retrieve called without datasetId', { baseUrl, query });
     throw createDifyError(500, 'DIFY_DATASET_ID_MISSING', 'Dify dataset id is required.');
   }
 
   if (!query || !query.trim()) {
+    logDifyError('Retrieve called without query', { baseUrl, datasetId });
     throw createDifyError(400, 'DIFY_QUERY_REQUIRED', 'Query is required for chunk retrieval.');
   }
 
@@ -191,6 +225,7 @@ async function retrieveChunks(options = {}) {
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   const body = { query: query.trim() };
+
   if (
     retrievalModel &&
     typeof retrievalModel === 'object' &&
@@ -216,8 +251,22 @@ async function retrieveChunks(options = {}) {
       timeoutError.code = 'DIFY_RETRIEVE_TIMEOUT';
       timeoutError.timeout = timeoutMs;
       timeoutError.url = url;
+
+      logDifyError('Retrieve request timed out', {
+        timeoutMs,
+        url,
+      });
       throw timeoutError;
     }
+
+    logDifyError('Retrieve request failed before response', {
+      url,
+      error: {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+      },
+    });
 
     error.url = url;
     throw error;
@@ -233,6 +282,12 @@ async function retrieveChunks(options = {}) {
     } catch (error) {
       parsedBody = rawBody;
     }
+
+    logDifyError('Retrieve request failed with response', {
+      status: response.status,
+      url,
+      body: parsedBody,
+    });
 
     const requestError = new Error(`Dify retrieve request failed with status ${response.status}`);
     requestError.status = response.status;
