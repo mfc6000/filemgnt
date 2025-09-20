@@ -1,7 +1,7 @@
 const path = require('path');
 const { randomUUID } = require('crypto');
 const { getDb } = require('../lib/db');
-const { uploadToDify, refreshDifyDocument } = require('./difyService');
+const { uploadToDify, refreshDifyDocument, isDifyConfigured } = require('./difyService');
 
 function createError(status, code, message) {
   const error = new Error(message);
@@ -50,23 +50,26 @@ async function uploadFile(repo, user, file, options = {}) {
   };
 
   let difyDocId = null;
+  let difySyncStatus = 'skipped';
+  let difySyncError = null;
 
-  try {
-    difyDocId = await uploadToDify(file.path, file.originalname);
-  } catch (error) {
-    const status = Number.isInteger(error.status) ? error.status : 502;
-    const code = error.code || 'DIFY_UPLOAD_FAILED';
-    const message =
-      error.message || 'Failed to sync file with the knowledge base. Upload aborted.';
-
-    const wrapped = createError(status, code, message);
-    console.error('Dify upload failed:', error);
-    throw wrapped;
+  if (isDifyConfigured()) {
+    difySyncStatus = 'pending';
+    try {
+      difyDocId = await uploadToDify(file.path, file.originalname);
+      difySyncStatus = 'succeeded';
+    } catch (error) {
+      difySyncStatus = 'failed';
+      difySyncError = error.message || 'Failed to sync with Dify.';
+      console.error('Dify upload failed:', error);
+    }
   }
 
   const metadata = {
     ...baseMetadata,
     ...(difyDocId ? { difyDocId } : {}),
+    difySyncStatus,
+    ...(difySyncError ? { difySyncError } : {}),
   };
 
   db.data.files.push(metadata);

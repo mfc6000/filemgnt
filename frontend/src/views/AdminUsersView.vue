@@ -130,6 +130,7 @@ interface UsersResponse {
 }
 
 const { t } = useI18n();
+
 const users = ref<AdminUserItem[]>([]);
 const loading = ref(false);
 const creating = ref(false);

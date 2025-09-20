@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { Blob } = require('buffer');
 
 function createDifyError(status, code, message) {
   const error = new Error(message);
@@ -47,10 +48,10 @@ async function uploadToDify(filePath, fileName) {
     : path.join(process.cwd(), filePath);
 
   await fs.promises.access(absolutePath, fs.constants.R_OK);
-
-  const fileStream = fs.createReadStream(absolutePath);
+  const buffer = await fs.promises.readFile(absolutePath);
+  const blob = new Blob([buffer]);
   const formData = new FormData();
-  formData.append('file', fileStream, fileName);
+  formData.append('file', blob, fileName);
 
   const response = await fetch(`${baseUrl}/v1/knowledge-bases/${kbId}/documents`, {
     method: 'POST',
