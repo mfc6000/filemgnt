@@ -166,14 +166,7 @@ async function deleteDifyDocument(documentId) {
 }
 
 async function retrieveChunks(options = {}) {
-  const {
-    baseUrl,
-    apiKey,
-    datasetId,
-    query,
-    retrievalModel,
-    timeoutMs = 15000,
-  } = options;
+  const { baseUrl, apiKey, datasetId, query, retrievalModel, timeoutMs = 15000 } = options;
 
   if (!baseUrl) {
     throw createDifyError(500, 'DIFY_BASE_URL_MISSING', 'Dify baseUrl is required.');
@@ -198,7 +191,11 @@ async function retrieveChunks(options = {}) {
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   const body = { query: query.trim() };
-  if (retrievalModel && typeof retrievalModel === 'object' && Object.keys(retrievalModel).length > 0) {
+  if (
+    retrievalModel &&
+    typeof retrievalModel === 'object' &&
+    Object.keys(retrievalModel).length > 0
+  ) {
     body.retrieval_model = retrievalModel;
   }
 
@@ -274,7 +271,11 @@ async function searchKnowledgeBase(query, options = {}) {
     Object.assign(retrievalModel, options.retrievalModel);
   }
 
-  if (options.filters && typeof options.filters === 'object' && Object.keys(options.filters).length > 0) {
+  if (
+    options.filters &&
+    typeof options.filters === 'object' &&
+    Object.keys(options.filters).length > 0
+  ) {
     retrievalModel.metadata_filter = options.filters;
   }
 
