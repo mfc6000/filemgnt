@@ -34,10 +34,13 @@ const maxUploadBytes = Number.isFinite(configuredMax) && configuredMax > 0
   ? configuredMax
   : 10 * 1024 * 1024;
 
-function createError(status, code, message) {
+function createError(status, code, message, details) {
   const error = new Error(message);
   error.status = status;
   error.code = code;
+  if (details && typeof details === 'object') {
+    error.details = details;
+  }
   return error;
 }
 
@@ -115,7 +118,8 @@ router.post(
           createError(
             413,
             'FILE_TOO_LARGE',
-            `File exceeds the maximum allowed size of ${maxUploadBytes} bytes.`
+            `File exceeds the maximum allowed size of ${maxUploadBytes} bytes.`,
+            { limit: maxUploadBytes }
           )
         );
         return;
@@ -126,7 +130,9 @@ router.post(
   },
   async (req, res, next) => {
     if (!req.file) {
-      next(createError(400, 'FILE_REQUIRED', 'A file must be uploaded using the "file" field.'));
+      next(
+        createError(400, 'FILE_REQUIRED', 'A file must be uploaded using the "file" field.')
+      );
       return;
     }
 

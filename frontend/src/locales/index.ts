@@ -136,6 +136,16 @@ export const messages = {
         uploadUnexpected: '上传文件时发生未知错误',
         success: '文件上传成功',
       },
+      errors: {
+        FILE_REQUIRED: '请通过“file”字段上传文件。',
+        FILE_TOO_LARGE: '文件大小超过限制。',
+        FILE_TOO_LARGE_WITH_LIMIT: '文件大小超过限制（最大 {limit}）。',
+        DIFY_SYNC_FAILED: '同步到 Dify 知识库失败。',
+        DIFY_SYNC_FAILED_WITH_REASON: '同步到 Dify 知识库失败：{reason}',
+        UNSUPPORTED_FILE_TYPE: '不支持的文件类型。',
+        UNAUTHORIZED: '未授权，请重新登录。',
+        INTERNAL_ERROR: '服务器内部错误，请稍后重试。',
+      },
     },
     adminUsers: {
       title: '用户管理',
@@ -354,6 +364,16 @@ export const messages = {
         uploadFailed: 'Upload failed',
         uploadUnexpected: 'Unexpected error while uploading file',
         success: 'File uploaded successfully',
+      },
+      errors: {
+        FILE_REQUIRED: 'A file is required. Please attach it again.',
+        FILE_TOO_LARGE: 'The file exceeds the allowed size.',
+        FILE_TOO_LARGE_WITH_LIMIT: 'The file exceeds the allowed size (max {limit}).',
+        DIFY_SYNC_FAILED: 'Failed to sync the file with the Dify knowledge base.',
+        DIFY_SYNC_FAILED_WITH_REASON: 'Failed to sync the file with the Dify knowledge base: {reason}',
+        UNSUPPORTED_FILE_TYPE: 'This file type is not supported.',
+        UNAUTHORIZED: 'You are not authorized. Please sign in again.',
+        INTERNAL_ERROR: 'Server error. Please try again later.',
       },
     },
     adminUsers: {

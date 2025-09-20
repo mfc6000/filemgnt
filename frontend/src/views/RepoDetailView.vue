@@ -107,6 +107,7 @@ interface FileItem {
   createdAt: string;
   storagePath: string;
   difyDocId?: string;
+  difySyncStatus?: 'pending' | 'succeeded' | 'skipped';
 }
 
 interface FilesResponse {
@@ -116,6 +117,26 @@ interface FilesResponse {
 interface RepoListResponse {
   data: RepoItem[];
 }
+
+type ApiErrorDetails = {
+  reason?: string;
+  limit?: number;
+  [key: string]: unknown;
+};
+
+interface ApiErrorPayload {
+  code?: string;
+  message?: string;
+  details?: ApiErrorDetails;
+}
+
+const repoDetailErrorMessages: Record<string, string> = {
+  FILE_REQUIRED: 'repoDetail.errors.FILE_REQUIRED',
+  FILE_TOO_LARGE: 'repoDetail.errors.FILE_TOO_LARGE',
+  UNSUPPORTED_FILE_TYPE: 'repoDetail.errors.UNSUPPORTED_FILE_TYPE',
+  UNAUTHORIZED: 'repoDetail.errors.UNAUTHORIZED',
+  INTERNAL_ERROR: 'repoDetail.errors.INTERNAL_ERROR',
+};
 
 const route = useRoute();
 const router = useRouter();
@@ -164,6 +185,52 @@ const formatSize = (size: number) => {
   return `${(size / (1024 * 1024 * 1024)).toFixed(1)} GB`;
 };
 
+const resolveErrorMessage = (error: unknown, fallbackKey: string) => {
+  if (!isAxiosError(error)) {
+    return t(fallbackKey);
+  }
+
+  const payload = error.response?.data?.error as ApiErrorPayload | undefined;
+  if (!payload) {
+    return t(fallbackKey);
+  }
+
+  const code = payload.code;
+  const details = payload.details ?? {};
+  const reason =
+    typeof details.reason === 'string' && details.reason.trim().length > 0
+      ? details.reason.trim()
+      : undefined;
+  const limitValue =
+    typeof details.limit === 'number' && Number.isFinite(details.limit)
+      ? details.limit
+      : undefined;
+
+  if (code === 'DIFY_SYNC_FAILED') {
+    if (reason) {
+      return t('repoDetail.errors.DIFY_SYNC_FAILED_WITH_REASON', { reason });
+    }
+    return t('repoDetail.errors.DIFY_SYNC_FAILED');
+  }
+
+  if (code === 'FILE_TOO_LARGE') {
+    if (typeof limitValue === 'number') {
+      return t('repoDetail.errors.FILE_TOO_LARGE_WITH_LIMIT', { limit: formatSize(limitValue) });
+    }
+    return t('repoDetail.errors.FILE_TOO_LARGE');
+  }
+
+  if (code && repoDetailErrorMessages[code]) {
+    return t(repoDetailErrorMessages[code]);
+  }
+
+  if (typeof payload.message === 'string' && payload.message.trim().length > 0) {
+    return payload.message;
+  }
+
+  return t(fallbackKey);
+};
+
 const goBack = () => {
   router.push({ name: 'repos' });
 };
@@ -185,11 +252,7 @@ const ensureRepoLoaded = async () => {
     }
     repo.value = found;
   } catch (error) {
-    if (isAxiosError(error)) {
-      Message.error(error.response?.data?.error?.message ?? t('repoDetail.messages.loadRepoFailed'));
-    } else {
-      Message.error(t('repoDetail.messages.loadRepoUnexpected'));
-    }
+    Message.error(resolveErrorMessage(error, 'repoDetail.messages.loadRepoFailed'));
     goBack();
     return;
   }
@@ -204,11 +267,7 @@ const loadFiles = async () => {
     const { data } = await http.get<FilesResponse>(`/repos/${repoId.value}/files`);
     files.value = data.data ?? [];
   } catch (error) {
-    if (isAxiosError(error)) {
-      Message.error(error.response?.data?.error?.message ?? t('repoDetail.messages.loadFilesFailed'));
-    } else {
-      Message.error(t('repoDetail.messages.loadFilesUnexpected'));
-    }
+    Message.error(resolveErrorMessage(error, 'repoDetail.messages.loadFilesFailed'));
   } finally {
     filesLoading.value = false;
   }
@@ -249,7 +308,6 @@ const handleUpload = async () => {
 
   try {
     const { data } = await http.post(`/repos/${repoId.value}/files`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress: (event) => {
         if (!event.total) {
           return;
@@ -266,11 +324,7 @@ const handleUpload = async () => {
     await loadFiles();
     resetForm();
   } catch (error) {
-    if (isAxiosError(error)) {
-      Message.error(error.response?.data?.error?.message ?? t('repoDetail.messages.uploadFailed'));
-    } else {
-      Message.error(t('repoDetail.messages.uploadUnexpected'));
-    }
+    Message.error(resolveErrorMessage(error, 'repoDetail.messages.uploadFailed'));
   } finally {
     uploading.value = false;
     uploadProgress.value = 0;
