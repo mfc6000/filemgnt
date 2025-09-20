@@ -167,7 +167,11 @@ async function searchKnowledgeBase(query, options = {}) {
     limit: pageSize,
   };
 
-  if (options.filters && typeof options.filters === 'object' && Object.keys(options.filters).length > 0) {
+  if (
+    options.filters &&
+    typeof options.filters === 'object' &&
+    Object.keys(options.filters).length > 0
+  ) {
     body.metadata_filter = options.filters;
   }
 
