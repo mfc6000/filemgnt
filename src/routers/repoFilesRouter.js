@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const { randomUUID } = require('crypto');
-const { listFiles, uploadFile } = require('../services/fileService');
+const { listFiles, uploadFile, deleteFile } = require('../services/fileService');
 const { getRepoForUser } = require('../services/repoService');
 
 const router = express.Router();
@@ -142,5 +142,14 @@ router.post(
     }
   }
 );
+
+router.delete('/:repoId/files/:fileId', ensureRepoAccess, async (req, res, next) => {
+  try {
+    const removed = await deleteFile(req.repo, req.params.fileId);
+    res.json({ data: removed });
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;

@@ -1,7 +1,13 @@
+const fs = require('fs');
 const path = require('path');
 const { randomUUID } = require('crypto');
 const { getDb } = require('../lib/db');
-const { uploadToDify, refreshDifyDocument, isDifyConfigured } = require('./difyService');
+const {
+  uploadToDify,
+  refreshDifyDocument,
+  isDifyConfigured,
+  deleteDifyDocument,
+} = require('./difyService');
 
 function createError(status, code, message) {
   const error = new Error(message);
@@ -90,8 +96,52 @@ function listAllFilesForAdmin(/* options */) {
   throw new Error('TODO: implement admin file listing');
 }
 
+
+async function deleteFile(repo, fileId) {
+  if (!repo) {
+    throw createError(400, 'REPO_REQUIRED', 'Repository context is required to delete files.');
+  }
+
+  if (!fileId) {
+    throw createError(400, 'FILE_ID_REQUIRED', 'File identifier is required.');
+  }
+
+  const db = await getDb();
+  const file = db.data.files.find((item) => item.id === fileId);
+
+  if (!file || file.repoId !== repo.id) {
+    throw createError(404, 'FILE_NOT_FOUND', 'File not found in this repository.');
+  }
+
+  const absolutePath = path.isAbsolute(file.storagePath)
+    ? file.storagePath
+    : path.join(process.cwd(), file.storagePath);
+
+  try {
+    await fs.promises.unlink(absolutePath);
+  } catch (error) {
+    if (error && error.code !== 'ENOENT') {
+      console.warn('Failed to remove file from disk:', error.message);
+    }
+  }
+
+  db.data.files = db.data.files.filter((item) => item.id !== fileId);
+  await db.write();
+
+  if (file.difyDocId && isDifyConfigured()) {
+    try {
+      await deleteDifyDocument(file.difyDocId);
+    } catch (error) {
+      console.warn('Failed to remove Dify document:', error.message);
+    }
+  }
+
+  return file;
+}
+
 module.exports = {
   listFiles,
   uploadFile,
   listAllFilesForAdmin,
+  deleteFile,
 };

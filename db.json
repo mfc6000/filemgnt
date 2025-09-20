@@ -29,6 +29,15 @@
       "name": "demo-personal",
       "description": "Demo user's personal workspace",
       "createdAt": "2024-01-03T12:00:00.000Z"
+    },
+    {
+      "id": "4be0d853-e618-4006-8e60-80b86d50af8a",
+      "owner": "admin",
+      "name": "Contracts",
+      "description": "",
+      "visibility": "private",
+      "createdAt": "2025-09-20T07:30:12.354Z",
+      "updatedAt": "2025-09-20T07:30:12.354Z"
     }
   ],
   "files": [

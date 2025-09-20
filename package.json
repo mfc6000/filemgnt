@@ -10,7 +10,9 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "test": "node -e \"console.log('No automated tests yet')\""
+    "test": "node -e \"console.log('No automated tests yet')\"",
+    "format": "prettier --write .",
+    "lint": "prettier --check ."
   },
   "keywords": [
     "express",
@@ -30,6 +32,12 @@
     "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
+    "nodemon": "^3.1.4",
+    "prettier": "^3.6.2"
+  },
+  "lint-staged": {
+    "*.{js,ts,vue,jsx,tsx,json,css,scss,md}": "prettier --write"
   }
 }
