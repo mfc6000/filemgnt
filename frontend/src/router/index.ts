@@ -7,12 +7,14 @@ import {
 import { useAuthStore } from '@/store';
 import { i18n } from '@/plugins/i18n';
 
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
     component: () => import('@/views/HomeView.vue'),
     meta: { titleKey: 'router.home', requiresAuth: true },
+
   },
   {
     path: '/repos',

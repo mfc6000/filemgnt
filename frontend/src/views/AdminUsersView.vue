@@ -130,7 +130,6 @@ interface UsersResponse {
 }
 
 const { t } = useI18n();
-
 const users = ref<AdminUserItem[]>([]);
 const loading = ref(false);
 const creating = ref(false);
@@ -152,6 +151,7 @@ const formatDate = (value: string) => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 };
+
 
 const columns = computed(() => [
   { title: t('adminUsers.table.columns.username'), dataIndex: 'username' },

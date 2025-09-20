@@ -46,6 +46,7 @@ const authStore = useAuthStore();
 const localeStore = useLocaleStore();
 const { t } = useI18n();
 
+
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 const isAdmin = computed(() => authStore.isAdmin);
 const username = computed(() => authStore.user?.username ?? '');
