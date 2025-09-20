@@ -18,7 +18,7 @@ function createError(status, code, message) {
 
 async function listFiles(repoId) {
   const db = await getDb();
-  const files = db.data.files.filter((file) => file.repoId === repoId);
+  const files = db.data.files.filter(file => file.repoId === repoId);
 
   return files.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
@@ -38,10 +38,7 @@ async function uploadFile(repo, user, file, options = {}) {
 
   const db = await getDb();
   const timestamp = new Date().toISOString();
-  const storagePath = path
-    .relative(process.cwd(), file.path)
-    .split(path.sep)
-    .join('/');
+  const storagePath = path.relative(process.cwd(), file.path).split(path.sep).join('/');
 
   const baseMetadata = {
     id: randomUUID(),
@@ -96,7 +93,6 @@ function listAllFilesForAdmin(/* options */) {
   throw new Error('TODO: implement admin file listing');
 }
 
-
 async function deleteFile(repo, fileId) {
   if (!repo) {
     throw createError(400, 'REPO_REQUIRED', 'Repository context is required to delete files.');
@@ -107,7 +103,7 @@ async function deleteFile(repo, fileId) {
   }
 
   const db = await getDb();
-  const file = db.data.files.find((item) => item.id === fileId);
+  const file = db.data.files.find(item => item.id === fileId);
 
   if (!file || file.repoId !== repo.id) {
     throw createError(404, 'FILE_NOT_FOUND', 'File not found in this repository.');
@@ -125,7 +121,7 @@ async function deleteFile(repo, fileId) {
     }
   }
 
-  db.data.files = db.data.files.filter((item) => item.id !== fileId);
+  db.data.files = db.data.files.filter(item => item.id !== fileId);
   await db.write();
 
   if (file.difyDocId && isDifyConfigured()) {

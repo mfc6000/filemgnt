@@ -12,11 +12,11 @@ This repository provides the groundwork for the file management platform: a Node
 
 Duplicate `.env.example` to `.env` and tweak the values as needed.
 
-| Key | Purpose |
-| --- | --- |
-| `PORT` | Port exposed by the Express API (Compose maps it to `5175`). |
-| `DIFY_BASE_URL`, `DIFY_KB_ID`, `DIFY_API_KEY` | Credentials for the Dify Knowledge Base integration. |
-| `UPLOAD_MAX_BYTES`, `UPLOAD_ALLOWED_MIME` | File size ceiling and MIME whitelist enforced during uploads. |
+| Key                                           | Purpose                                                       |
+| --------------------------------------------- | ------------------------------------------------------------- |
+| `PORT`                                        | Port exposed by the Express API (Compose maps it to `5175`).  |
+| `DIFY_BASE_URL`, `DIFY_KB_ID`, `DIFY_API_KEY` | Credentials for the Dify Knowledge Base integration.          |
+| `UPLOAD_MAX_BYTES`, `UPLOAD_ALLOWED_MIME`     | File size ceiling and MIME whitelist enforced during uploads. |
 
 ## Local environment setup (testing & debugging)
 
@@ -42,8 +42,8 @@ npm install
 
 ### 3. Seed local data
 
-- `db.json` ships with sample accounts (`admin` / `admin123`, `user` / `user123`), repositories, and files. Modify it freely while iterating.  
-- To reset the datastore, delete `db.json` and restore it from version control (e.g., `git checkout -- db.json`) or keep a personal template handy.  
+- `db.json` ships with sample accounts (`admin` / `admin123`, `user` / `user123`), repositories, and files. Modify it freely while iterating.
+- To reset the datastore, delete `db.json` and restore it from version control (e.g., `git checkout -- db.json`) or keep a personal template handy.
 - Uploaded binaries land under `uploads/`. Remove files here if you want a clean state.
 
 ### 4. Run the backend
@@ -108,9 +108,9 @@ Augment this script with unit or integration tests as implementation progresses.
 
 ### 8. Troubleshooting tips
 
-- **Reset state quickly** – stop the servers, delete `uploads/` content, and restore `db.json` from a known snapshot.  
-- **CORS errors** – ensure the backend is running before the frontend; the Express app already enables CORS for dev hosts.  
-- **Port conflicts** – change Vite's port via `frontend/vite.config.ts` or set `VITE_PORT` in `frontend/.env`.  
+- **Reset state quickly** – stop the servers, delete `uploads/` content, and restore `db.json` from a known snapshot.
+- **CORS errors** – ensure the backend is running before the frontend; the Express app already enables CORS for dev hosts.
+- **Port conflicts** – change Vite's port via `frontend/vite.config.ts` or set `VITE_PORT` in `frontend/.env`.
 - **Docker parity** – if something only fails in containers, run `docker compose up --build` to reproduce the stack with the same environment variables.
 
 ## Testing
@@ -169,6 +169,7 @@ frontend/             # Vue 3 + Vite scaffold
 ```
 
 Refer to the documents inside `doc/` for acceptance criteria, architecture notes, and upgrade guidance.
-## Notes and Comments
-👉 [WSL Node.js Guide](doc/wsl_node_nodemon_guide.md)
 
+## Notes and Comments
+
+👉 [WSL Node.js Guide](doc/wsl_node_nodemon_guide.md)

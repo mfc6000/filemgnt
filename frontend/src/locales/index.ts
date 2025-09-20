@@ -271,7 +271,8 @@ export const messages = {
     },
     home: {
       title: 'Search your workspace',
-      subtitle: 'Enter a keyword to search synced files across repositories. Results respect your access level.',
+      subtitle:
+        'Enter a keyword to search synced files across repositories. Results respect your access level.',
       manageRepos: 'Manage repositories',
       userManagement: 'User management',
       searchPlaceholder: 'Search documents, filenames, or keywords',
@@ -300,7 +301,8 @@ export const messages = {
     },
     repos: {
       title: 'Your repositories',
-      description: 'Create repositories to organize uploaded documents. They stay private unless shared.',
+      description:
+        'Create repositories to organize uploaded documents. They stay private unless shared.',
       form: {
         nameLabel: 'Repository name',
         namePlaceholder: 'e.g. Contracts',
@@ -377,12 +379,14 @@ export const messages = {
         uploadUnexpected: 'Unexpected error while uploading file',
         success: 'File uploaded successfully',
         difySyncFailed: 'File uploaded, but syncing to the Dify knowledge base failed.',
-        difySyncFailedWithReason: 'File uploaded, but syncing to the Dify knowledge base failed: {reason}',
+        difySyncFailedWithReason:
+          'File uploaded, but syncing to the Dify knowledge base failed: {reason}',
       },
     },
     adminUsers: {
       title: 'User management',
-      description: 'Administrators can create accounts, toggle roles, and deactivate users. Follow your security policy for password delivery.',
+      description:
+        'Administrators can create accounts, toggle roles, and deactivate users. Follow your security policy for password delivery.',
       form: {
         usernameLabel: 'Username',
         usernamePlaceholder: 'e.g. alice',

@@ -13,7 +13,7 @@ async function start() {
   });
 }
 
-start().catch((error) => {
+start().catch(error => {
   console.error('Failed to start server', error);
   process.exit(1);
 });
