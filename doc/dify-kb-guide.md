@@ -41,7 +41,7 @@ DIFY_KB_ID=your_knowledge_base_id          # 第 2 步获取的 Knowledge Base I
 
 ## 5. 后端如何使用这些配置
 
-- **文件上传同步**：`src/services/difyService.js` 中的 `uploadToDify` 会读取 `DIFY_BASE_URL`、`DIFY_API_KEY` 与 `DIFY_KB_ID`，将本地保存的文件流式上传到 Dify 知识库。
+- **文件上传同步**：`src/services/difyService.js` 中的 `uploadToDify` 会读取 `DIFY_BASE_URL`、`DIFY_API_KEY` 与 `DIFY_KB_ID`，将本地保存的文件流式上传到 Dify 知识库，并在成功后调用 `refreshDifyDocument` 主动刷新索引。
 - **搜索功能**：`searchService` 在处理 `/api/search` 请求时会判断 Dify 配置是否齐全；若配置完整，则调用 Dify 的搜索 API，返回统一的搜索结果。
 
 确保上述环境变量在 Node.js 进程中可用（例如通过 `dotenv` 加载 `.env` 文件，或在 Docker Compose 中设置 `environment` 字段），即可完成 Dify 集成。
@@ -52,7 +52,7 @@ DIFY_KB_ID=your_knowledge_base_id          # 第 2 步获取的 Knowledge Base I
 | --- | --- | --- |
 | 上传返回 `DIFY_CONFIG_MISSING` | 未配置或缺少任一 Dify 环境变量 | 核对 `.env` 或部署环境变量，确保三项都存在 |
 | 返回 `401 Unauthorized` | API Key 无效或权限不足 | 在 Dify 控制台重新生成具有文档读写权限的 Key |
-| 上传成功但搜索不到 | Dify 处理同步需要时间 / 索引未完成 | 等待索引完成，或在 Dify 控制台检查文档状态 |
+| 上传成功但搜索不到 | Dify 处理同步需要时间 / 索引未完成 | 稍候再试，或登录 Dify 控制台确认索引任务状态（系统会自动调用刷新接口） |
 | Docker 环境无法访问 Dify | 网络策略或代理限制 | 在部署环境检查出口网络、代理配置或 TLS 设置 |
 
 ## 7. 下一步建议

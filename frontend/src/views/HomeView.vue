@@ -15,7 +15,8 @@
         </a-space>
       </div>
 
-     <a-form layout="vertical" class="search-form">
+
+      <a-form layout="vertical" class="search-form">
         <a-form-item field="query" hide-label :validate-status="queryError ? 'error' : 'success'">
           <a-input-search
             v-model="query"

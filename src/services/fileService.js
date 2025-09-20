@@ -1,7 +1,7 @@
 const path = require('path');
 const { randomUUID } = require('crypto');
 const { getDb } = require('../lib/db');
-const { uploadToDify } = require('./difyService');
+const { uploadToDify, refreshDifyDocument } = require('./difyService');
 
 function createError(status, code, message) {
   const error = new Error(message);
@@ -62,6 +62,12 @@ async function uploadFile(repo, user, file, options = {}) {
     if (difyDocId) {
       metadata.difyDocId = difyDocId;
       await db.write();
+      try {
+        await refreshDifyDocument(difyDocId);
+      } catch (refreshError) {
+        console.warn('Dify document refresh failed:', refreshError.message);
+      }
+
     }
   } catch (error) {
     console.warn('Failed to upload document to Dify:', error.message);

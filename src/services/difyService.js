@@ -69,6 +69,54 @@ async function uploadToDify(filePath, fileName) {
   return null;
 }
 
+async function refreshDifyDocument(documentId) {
+  if (!documentId) {
+    return false;
+  }
+
+  const { baseUrl, kbId, apiKey } = ensureConfigured();
+
+  const endpoints = [
+    `${baseUrl}/v1/knowledge-bases/${kbId}/documents/${documentId}/refresh`,
+    `${baseUrl}/v1/knowledge-bases/${kbId}/documents/${documentId}/sync`,
+    `${baseUrl}/v1/knowledge-bases/${kbId}/documents/${documentId}/index`,
+  ];
+
+  let lastError = null;
+
+  for (const url of endpoints) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      });
+
+      if (response.ok) {
+        return true;
+      }
+
+      if (response.status === 404) {
+        continue;
+      }
+
+      const text = await response.text();
+      lastError = new Error(`Dify document refresh failed (${response.status}): ${text}`);
+      lastError.status = response.status;
+      lastError.code = 'DIFY_REFRESH_FAILED';
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (lastError) {
+    throw lastError;
+  }
+
+  return false;
+}
+
 async function searchKnowledgeBase(query, options = {}) {
   const { baseUrl, kbId, apiKey } = ensureConfigured();
 
@@ -112,6 +160,7 @@ function isDifyConfigured() {
 
 module.exports = {
   uploadToDify,
+  refreshDifyDocument,
   searchKnowledgeBase,
   isDifyConfigured,
 };
