@@ -161,7 +161,6 @@ async function searchKnowledgeBase(query, options = {}) {
 
   const page = Math.max(1, Number.parseInt(options.page, 10) || 1);
   const pageSize = Math.max(1, Math.min(50, Number.parseInt(options.pageSize, 10) || 10));
-
   const body = {
     keywords: query || '',
     page,
@@ -176,9 +175,7 @@ async function searchKnowledgeBase(query, options = {}) {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
     },
-    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
@@ -189,7 +186,62 @@ async function searchKnowledgeBase(query, options = {}) {
     throw error;
   }
 
-  return response.json();
+  const payload = await response.json();
+
+  if (!query) {
+    return payload;
+  }
+
+  const normalizedQuery = query.toLowerCase();
+  const data = Array.isArray(payload?.data)
+    ? payload.data
+    : Array.isArray(payload?.items)
+      ? payload.items
+      : [];
+
+  const filtered = data.filter(item => {
+    const name =
+      (typeof item?.name === 'string' && item.name) ||
+      (typeof item?.document_name === 'string' && item.document_name) ||
+      (typeof item?.title === 'string' && item.title) ||
+      '';
+
+    if (!name.toLowerCase().includes(normalizedQuery)) {
+      return false;
+    }
+
+    if (!filters) {
+      return true;
+    }
+
+    const metadata =
+      (item && typeof item === 'object' && (item.metadata || item.document_metadata || {})) || {};
+
+    return Object.entries(filters).every(([key, value]) => {
+      if (metadata[key] === undefined) {
+        return false;
+      }
+
+      if (Array.isArray(value)) {
+        return value.includes(metadata[key]);
+      }
+
+      return metadata[key] === value;
+    });
+  });
+
+  if (filtered.length === data.length) {
+    return payload;
+  }
+
+  return {
+    ...payload,
+    data: filtered,
+    total:
+      typeof payload?.total === 'number'
+        ? Math.min(payload.total, filtered.length)
+        : filtered.length,
+  };
 }
 
 function isDifyConfigured() {
