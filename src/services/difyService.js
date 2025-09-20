@@ -189,7 +189,11 @@ async function searchKnowledgeBase(query, options = {}) {
   }
 
   const normalizedQuery = query.toLowerCase();
-  const data = Array.isArray(payload?.data) ? payload.data : Array.isArray(payload?.items) ? payload.items : [];
+  const data = Array.isArray(payload?.data)
+    ? payload.data
+    : Array.isArray(payload?.items)
+      ? payload.items
+      : [];
 
   const filtered = data.filter(item => {
     const name =
@@ -229,7 +233,10 @@ async function searchKnowledgeBase(query, options = {}) {
   return {
     ...payload,
     data: filtered,
-    total: typeof payload?.total === 'number' ? Math.min(payload.total, filtered.length) : filtered.length,
+    total:
+      typeof payload?.total === 'number'
+        ? Math.min(payload.total, filtered.length)
+        : filtered.length,
   };
 }
 
