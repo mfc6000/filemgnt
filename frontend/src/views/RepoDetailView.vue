@@ -29,7 +29,7 @@
             </a-col>
             <a-col :xs="12" :sm="5">
               <a-form-item :label="t('repoDetail.shareLabel')">
-               <a-switch v-model="share" size="small" />
+                <a-switch v-model="share" size="small" />
               </a-form-item>
             </a-col>
             <a-col :xs="12" :sm="5">
@@ -37,7 +37,9 @@
                 <a-button type="primary" :loading="uploading" @click="handleUpload">
                   {{ t('repoDetail.uploadButton') }}
                 </a-button>
-                <a-button type="text" :disabled="uploading" @click="resetForm">{{ t('repoDetail.resetButton') }}</a-button>
+                <a-button type="text" :disabled="uploading" @click="resetForm">{{
+                  t('repoDetail.resetButton')
+                }}</a-button>
               </div>
             </a-col>
           </a-row>
@@ -58,10 +60,10 @@
           class="files-table"
         >
           <template #name="{ record }">
-              <div class="file-name">
-                <IconFile class="file-icon" />
-                <span>{{ record.name }}</span>
-              </div>
+            <div class="file-name">
+              <IconFile class="file-icon" />
+              <span>{{ record.name }}</span>
+            </div>
           </template>
           <template #size="{ record }">
             {{ formatSize(record.size) }}
@@ -74,6 +76,17 @@
           <template #createdAt="{ record }">
             {{ formatDate(record.createdAt) }}
           </template>
+          <template #actions="{ record }">
+            <a-button
+              type="text"
+              size="mini"
+              status="danger"
+              :loading="deletingId === record.id"
+              @click.stop="confirmDelete(record)"
+            >
+              {{ t('repoDetail.actions.delete') }}
+            </a-button>
+          </template>
         </a-table>
       </a-card>
     </a-space>
@@ -84,7 +97,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { isAxiosError } from 'axios';
-import { Message } from '@arco-design/web-vue';
+import { Message, Modal } from '@arco-design/web-vue';
 import { IconFile } from '@arco-design/web-vue/es/icon';
 import { useI18n } from 'vue-i18n';
 import http from '@/api/http';
@@ -151,6 +164,7 @@ const uploadProgress = ref(0);
 const share = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 const selectedFile = ref<File | null>(null);
+const deletingId = ref<string | null>(null);
 
 const filesPagination = computed(() => ({
   pageSize: 10,
@@ -162,6 +176,7 @@ const columns = computed(() => [
   { title: t('repoDetail.columns.size'), slotName: 'size', width: 140 },
   { title: t('repoDetail.columns.share'), slotName: 'share', width: 120 },
   { title: t('repoDetail.columns.created'), slotName: 'createdAt', width: 200 },
+  { title: t('repoDetail.columns.actions'), slotName: 'actions', width: 120 },
 ]);
 
 const formatDate = (value: string) => {
@@ -244,7 +259,7 @@ const ensureRepoLoaded = async () => {
 
   try {
     const { data } = await http.get<RepoListResponse>('/repos');
-    const found = data.data?.find((item) => item.id === repoId.value);
+    const found = data.data?.find(item => item.id === repoId.value);
     if (!found) {
       Message.error(t('repoDetail.messages.notFound'));
       goBack();
@@ -321,6 +336,15 @@ const handleUpload = async () => {
       files.value = [created, ...files.value];
     }
     Message.success({ content: t('repoDetail.messages.success'), duration: 2000 });
+    if (created?.difySyncStatus === 'failed') {
+      const reason = created.difySyncError?.trim();
+      Message.warning({
+        content: reason
+          ? t('repoDetail.messages.difySyncFailedWithReason', { reason })
+          : t('repoDetail.messages.difySyncFailed'),
+        duration: 4000,
+      });
+    }
     await loadFiles();
     resetForm();
   } catch (error) {
@@ -329,6 +353,42 @@ const handleUpload = async () => {
     uploading.value = false;
     uploadProgress.value = 0;
   }
+};
+
+const performDelete = async (file: FileItem) => {
+  if (!repoId.value) {
+    Message.error(t('repoDetail.messages.missingRepo'));
+    return;
+  }
+
+  deletingId.value = file.id;
+  try {
+    await http.delete(`/repos/${repoId.value}/files/${file.id}`);
+    files.value = files.value.filter(item => item.id !== file.id);
+    Message.success({
+      content: t('repoDetail.messages.deleteSuccess', { name: file.name }),
+      duration: 1500,
+    });
+  } catch (error) {
+    if (isAxiosError(error)) {
+      Message.error(error.response?.data?.error?.message ?? t('repoDetail.messages.deleteFailed'));
+    } else {
+      Message.error(t('repoDetail.messages.deleteUnexpected'));
+    }
+  } finally {
+    deletingId.value = null;
+  }
+};
+
+const confirmDelete = (file: FileItem) => {
+  Modal.confirm({
+    title: t('repoDetail.confirm.title'),
+    content: t('repoDetail.confirm.message', { name: file.name }),
+    okText: t('repoDetail.confirm.ok'),
+    cancelText: t('repoDetail.confirm.cancel'),
+    okButtonProps: { status: 'danger' },
+    onOk: () => performDelete(file),
+  });
 };
 
 onMounted(async () => {

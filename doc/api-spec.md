@@ -2,19 +2,19 @@
 
 ## 1. 接口总览
 
-| 模块 | 方法 | 路径 | 参数 | 权限 | 说明 |
-| --- | --- | --- | --- | --- | --- |
-| Auth | POST | `/api/auth/login` | Body：`{ username: string, password: string }` | 公共入口（无需 token），仅启用账号可成功 | 模拟登录，返回访问令牌与用户信息 |
-| Admin · Users | GET | `/api/admin/users` | Query：`page`, `pageSize`, `keyword?` | `admin` | 分页查询用户列表 |
-| Admin · Users | POST | `/api/admin/users` | Body：`{ username, displayName, role, email?, password }` | `admin` | 创建用户，默认启用 |
-| Admin · Users | PUT | `/api/admin/users/:id` | Path：`id`; Body：`{ displayName?, role?, email?, isActive?, password? }` | `admin` | 更新用户信息或状态 |
-| Admin · Users | DELETE | `/api/admin/users/:id` | Path：`id` | `admin` | 软删除用户（标记禁用） |
-| Repos | GET | `/api/repos` | Query：`page`, `pageSize` | 登录用户（`admin` 可查看全部，`user` 仅自己） | 获取当前用户（或管理员）可见仓库 |
-| Repos | POST | `/api/repos` | Body：`{ name, description?, visibility? }`（管理员可额外传 `ownerId`） | 登录用户 | 创建仓库并设置可见性 |
-| Files | GET | `/api/repos/:id/files` | Path：`id`; Query：`page`, `pageSize`, `share?` | 仓库拥有者或管理员；`share=true` 文件对管理员全部可见 | 列出仓库文件 |
-| Files | POST | `/api/repos/:id/files` | Path：`id`; Body (multipart)：`file`, `share`, `tags?` | 仓库拥有者或管理员 | 上传文件至仓库并同步 Dify |
-| Admin · Files | GET | `/api/admin/files` | Query：`page`, `pageSize`, `ownerId?`, `repoId?`, `share?`, `status?` | `admin` | 跨仓库查看所有文件 |
-| Search | GET | `/api/search` | Query：`q`, `repoId?`, `share?`, `page?`, `pageSize?` | 登录用户 | 调用 Dify 返回授权范围内的搜索结果 |
+| 模块          | 方法   | 路径                   | 参数                                                                      | 权限                                                  | 说明                               |
+| ------------- | ------ | ---------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------- |
+| Auth          | POST   | `/api/auth/login`      | Body：`{ username: string, password: string }`                            | 公共入口（无需 token），仅启用账号可成功              | 模拟登录，返回访问令牌与用户信息   |
+| Admin · Users | GET    | `/api/admin/users`     | Query：`page`, `pageSize`, `keyword?`                                     | `admin`                                               | 分页查询用户列表                   |
+| Admin · Users | POST   | `/api/admin/users`     | Body：`{ username, displayName, role, email?, password }`                 | `admin`                                               | 创建用户，默认启用                 |
+| Admin · Users | PUT    | `/api/admin/users/:id` | Path：`id`; Body：`{ displayName?, role?, email?, isActive?, password? }` | `admin`                                               | 更新用户信息或状态                 |
+| Admin · Users | DELETE | `/api/admin/users/:id` | Path：`id`                                                                | `admin`                                               | 软删除用户（标记禁用）             |
+| Repos         | GET    | `/api/repos`           | Query：`page`, `pageSize`                                                 | 登录用户（`admin` 可查看全部，`user` 仅自己）         | 获取当前用户（或管理员）可见仓库   |
+| Repos         | POST   | `/api/repos`           | Body：`{ name, description?, visibility? }`（管理员可额外传 `ownerId`）   | 登录用户                                              | 创建仓库并设置可见性               |
+| Files         | GET    | `/api/repos/:id/files` | Path：`id`; Query：`page`, `pageSize`, `share?`                           | 仓库拥有者或管理员；`share=true` 文件对管理员全部可见 | 列出仓库文件                       |
+| Files         | POST   | `/api/repos/:id/files` | Path：`id`; Body (multipart)：`file`, `share`, `tags?`                    | 仓库拥有者或管理员                                    | 上传文件至仓库并同步 Dify          |
+| Admin · Files | GET    | `/api/admin/files`     | Query：`page`, `pageSize`, `ownerId?`, `repoId?`, `share?`, `status?`     | `admin`                                               | 跨仓库查看所有文件                 |
+| Search        | GET    | `/api/search`          | Query：`q`, `repoId?`, `share?`, `page?`, `pageSize?`                     | 登录用户                                              | 调用 Dify 返回授权范围内的搜索结果 |
 
 > **分页约定**：`page` 从 1 开始，`pageSize` 默认 20，最大 100。所有返回列表结构统一为 `{ items: T[], page, pageSize, total }`。
 
@@ -23,6 +23,7 @@
 ### 2.1 POST /api/auth/login
 
 **请求**
+
 ```http
 POST /api/auth/login HTTP/1.1
 Content-Type: application/json
@@ -34,6 +35,7 @@ Content-Type: application/json
 ```
 
 **成功响应** (`200 OK`)
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -49,6 +51,7 @@ Content-Type: application/json
 ```
 
 **失败响应** (`401 Unauthorized`)
+
 ```json
 {
   "error": {
@@ -62,12 +65,14 @@ Content-Type: application/json
 ### 2.2 GET /api/admin/users
 
 **请求**
+
 ```http
 GET /api/admin/users?page=1&pageSize=20 HTTP/1.1
 Authorization: Bearer <admin-token>
 ```
 
 **成功响应** (`200 OK`)
+
 ```json
 {
   "items": [
@@ -88,6 +93,7 @@ Authorization: Bearer <admin-token>
 ```
 
 **失败响应** (`403 Forbidden`)
+
 ```json
 {
   "error": {
@@ -101,6 +107,7 @@ Authorization: Bearer <admin-token>
 ### 2.3 POST /api/admin/users
 
 **请求**
+
 ```http
 POST /api/admin/users HTTP/1.1
 Authorization: Bearer <admin-token>
@@ -116,6 +123,7 @@ Content-Type: application/json
 ```
 
 **成功响应** (`201 Created`)
+
 ```json
 {
   "id": "u_456",
@@ -129,6 +137,7 @@ Content-Type: application/json
 ```
 
 **失败响应** (`409 Conflict`)
+
 ```json
 {
   "error": {
@@ -142,6 +151,7 @@ Content-Type: application/json
 ### 2.4 PUT /api/admin/users/:id
 
 **请求**
+
 ```http
 PUT /api/admin/users/u_456 HTTP/1.1
 Authorization: Bearer <admin-token>
@@ -155,6 +165,7 @@ Content-Type: application/json
 ```
 
 **成功响应** (`200 OK`)
+
 ```json
 {
   "id": "u_456",
@@ -168,6 +179,7 @@ Content-Type: application/json
 ```
 
 **失败响应** (`404 Not Found`)
+
 ```json
 {
   "error": {
@@ -181,6 +193,7 @@ Content-Type: application/json
 ### 2.5 DELETE /api/admin/users/:id
 
 **请求**
+
 ```http
 DELETE /api/admin/users/u_456 HTTP/1.1
 Authorization: Bearer <admin-token>
@@ -189,6 +202,7 @@ Authorization: Bearer <admin-token>
 **成功响应** (`204 No Content`)
 
 **失败响应** (`409 Conflict`)
+
 ```json
 {
   "error": {
@@ -202,12 +216,14 @@ Authorization: Bearer <admin-token>
 ### 2.6 GET /api/repos
 
 **请求**
+
 ```http
 GET /api/repos?page=1&pageSize=10 HTTP/1.1
 Authorization: Bearer <user-token>
 ```
 
 **成功响应** (`200 OK`)
+
 ```json
 {
   "items": [
@@ -227,6 +243,7 @@ Authorization: Bearer <user-token>
 ```
 
 **失败响应** (`401 Unauthorized`)
+
 ```json
 {
   "error": {
@@ -240,6 +257,7 @@ Authorization: Bearer <user-token>
 ### 2.7 POST /api/repos
 
 **请求**
+
 ```http
 POST /api/repos HTTP/1.1
 Authorization: Bearer <user-token>
@@ -253,6 +271,7 @@ Content-Type: application/json
 ```
 
 **成功响应** (`201 Created`)
+
 ```json
 {
   "id": "r_2001",
@@ -265,6 +284,7 @@ Content-Type: application/json
 ```
 
 **失败响应** (`409 Conflict`)
+
 ```json
 {
   "error": {
@@ -278,12 +298,14 @@ Content-Type: application/json
 ### 2.8 GET /api/repos/:id/files
 
 **请求**
+
 ```http
 GET /api/repos/r_2001/files?page=1&pageSize=20 HTTP/1.1
 Authorization: Bearer <user-token>
 ```
 
 **成功响应** (`200 OK`)
+
 ```json
 {
   "items": [
@@ -306,6 +328,7 @@ Authorization: Bearer <user-token>
 ```
 
 **失败响应** (`403 Forbidden`)
+
 ```json
 {
   "error": {
@@ -319,6 +342,7 @@ Authorization: Bearer <user-token>
 ### 2.9 POST /api/repos/:id/files
 
 **请求**
+
 ```http
 POST /api/repos/r_2001/files HTTP/1.1
 Authorization: Bearer <user-token>
@@ -337,6 +361,7 @@ true
 ```
 
 **成功响应** (`201 Created`)
+
 ```json
 {
   "id": "f_9100",
@@ -353,6 +378,7 @@ true
 ```
 
 **失败响应** (`415 Unsupported Media Type`)
+
 ```json
 {
   "error": {
@@ -366,12 +392,14 @@ true
 ### 2.10 GET /api/admin/files
 
 **请求**
+
 ```http
 GET /api/admin/files?page=1&pageSize=50&status=failed HTTP/1.1
 Authorization: Bearer <admin-token>
 ```
 
 **成功响应** (`200 OK`)
+
 ```json
 {
   "items": [
@@ -393,6 +421,7 @@ Authorization: Bearer <admin-token>
 ```
 
 **失败响应** (`401 Unauthorized`)
+
 ```json
 {
   "error": {
@@ -406,12 +435,14 @@ Authorization: Bearer <admin-token>
 ### 2.11 GET /api/search
 
 **请求**
+
 ```http
 GET /api/search?q=知识库&page=1&pageSize=5 HTTP/1.1
 Authorization: Bearer <user-token>
 ```
 
 **成功响应** (`200 OK`)
+
 ```json
 {
   "query": "知识库",
@@ -432,6 +463,7 @@ Authorization: Bearer <user-token>
 ```
 
 **失败响应** (`400 Bad Request`)
+
 ```json
 {
   "error": {
@@ -449,15 +481,16 @@ Authorization: Bearer <user-token>
 ```json
 {
   "error": {
-    "code": "STRING",        // 机器可读错误码
-    "message": "STRING",     // 面向用户或前端的友好提示
-    "details": {              // 可选，提供字段级错误、外部系统返回等信息
+    "code": "STRING", // 机器可读错误码
+    "message": "STRING", // 面向用户或前端的友好提示
+    "details": {
+      // 可选，提供字段级错误、外部系统返回等信息
       "field": "username",
       "reason": "REQUIRED"
     }
   },
-  "requestId": "STRING",     // 可选，用于日志关联追踪
-  "timestamp": "ISO-8601"     // 可选，发生时间
+  "requestId": "STRING", // 可选，用于日志关联追踪
+  "timestamp": "ISO-8601" // 可选，发生时间
 }
 ```
 
