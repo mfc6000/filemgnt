@@ -37,7 +37,7 @@ async function uploadFile(repo, user, file, options = {}) {
     .split(path.sep)
     .join('/');
 
-  const metadata = {
+  const baseMetadata = {
     id: randomUUID(),
     repoId: repo.id,
     uploaderId: user.username,
@@ -49,28 +49,35 @@ async function uploadFile(repo, user, file, options = {}) {
     storagePath,
   };
 
+  let difyDocId = null;
+
+  try {
+    difyDocId = await uploadToDify(file.path, file.originalname);
+  } catch (error) {
+    const status = Number.isInteger(error.status) ? error.status : 502;
+    const code = error.code || 'DIFY_UPLOAD_FAILED';
+    const message =
+      error.message || 'Failed to sync file with the knowledge base. Upload aborted.';
+
+    const wrapped = createError(status, code, message);
+    console.error('Dify upload failed:', error);
+    throw wrapped;
+  }
+
+  const metadata = {
+    ...baseMetadata,
+    ...(difyDocId ? { difyDocId } : {}),
+  };
+
   db.data.files.push(metadata);
   await db.write();
 
-  const difyPayload = {
-    path: file.path,
-    name: file.originalname,
-  };
-
-  try {
-    const difyDocId = await uploadToDify(difyPayload.path, difyPayload.name);
-    if (difyDocId) {
-      metadata.difyDocId = difyDocId;
-      await db.write();
-      try {
-        await refreshDifyDocument(difyDocId);
-      } catch (refreshError) {
-        console.warn('Dify document refresh failed:', refreshError.message);
-      }
-
+  if (difyDocId) {
+    try {
+      await refreshDifyDocument(difyDocId);
+    } catch (refreshError) {
+      console.warn('Dify document refresh failed:', refreshError.message);
     }
-  } catch (error) {
-    console.warn('Failed to upload document to Dify:', error.message);
   }
 
   return metadata;

@@ -1,6 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
+function createDifyError(status, code, message) {
+  const error = new Error(message);
+  error.status = status;
+  error.code = code;
+  return error;
+}
+
 function normalizeBaseUrl(url) {
   if (!url) return '';
   return url.endsWith('/') ? url.slice(0, -1) : url;
@@ -23,7 +30,11 @@ function ensureConfigured() {
   const config = getDifyConfig();
 
   if (!config.isConfigured) {
-    throw new Error('Missing Dify configuration. Ensure DIFY_BASE_URL, DIFY_KB_ID, and DIFY_API_KEY are set.');
+    throw createDifyError(
+      500,
+      'DIFY_NOT_CONFIGURED',
+      'Missing Dify configuration. Ensure DIFY_BASE_URL, DIFY_KB_ID, and DIFY_API_KEY are set.'
+    );
   }
 
   return config;
@@ -51,10 +62,11 @@ async function uploadToDify(filePath, fileName) {
 
   if (!response.ok) {
     const text = await response.text();
-    const error = new Error(`Dify upload failed (${response.status}): ${text}`);
-    error.status = response.status;
-    error.code = 'DIFY_UPLOAD_FAILED';
-    throw error;
+    throw createDifyError(
+      response.status,
+      'DIFY_UPLOAD_FAILED',
+      `Dify upload failed (${response.status}): ${text}`
+    );
   }
 
   const payload = await response.json();
@@ -102,9 +114,11 @@ async function refreshDifyDocument(documentId) {
       }
 
       const text = await response.text();
-      lastError = new Error(`Dify document refresh failed (${response.status}): ${text}`);
-      lastError.status = response.status;
-      lastError.code = 'DIFY_REFRESH_FAILED';
+      lastError = createDifyError(
+        response.status,
+        'DIFY_REFRESH_FAILED',
+        `Dify document refresh failed (${response.status}): ${text}`
+      );
     } catch (error) {
       lastError = error;
     }
