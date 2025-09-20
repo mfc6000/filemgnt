@@ -5,7 +5,7 @@ import {
   RouteRecordRaw,
 } from 'vue-router';
 import { useAuthStore } from '@/store';
-import { i18n } from '@/plugins/i18n';
+import { i18n } from '@/plugins/i18n'
 
 const routes: RouteRecordRaw[] = [
   {

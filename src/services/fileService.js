@@ -96,6 +96,7 @@ function listAllFilesForAdmin(/* options */) {
   throw new Error('TODO: implement admin file listing');
 }
 
+
 async function deleteFile(repo, fileId) {
   if (!repo) {
     throw createError(400, 'REPO_REQUIRED', 'Repository context is required to delete files.');

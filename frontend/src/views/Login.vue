@@ -59,7 +59,6 @@ const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 const { t } = useI18n();
-
 const form = reactive<LoginForm>({
   username: '',
   password: '',
