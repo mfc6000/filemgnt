@@ -9,10 +9,13 @@ const {
   deleteDifyDocument,
 } = require('./difyService');
 
-function createError(status, code, message) {
+function createError(status, code, message, details) {
   const error = new Error(message);
   error.status = status;
   error.code = code;
+  if (details && typeof details === 'object') {
+    error.details = details;
+  }
   return error;
 }
 
@@ -62,11 +65,15 @@ async function uploadFile(repo, user, file, options = {}) {
       difySyncStatus = 'succeeded';
     } catch (error) {
       console.error('Dify upload failed:', error);
-      const reason = typeof error?.message === 'string' ? error.message.trim() : '';
+      const message = typeof error?.message === 'string' ? error.message.trim() : '';
+      const causeMessage =
+        typeof error?.cause?.message === 'string' ? error.cause.message.trim() : '';
+      const reason = message || causeMessage;
       throw createError(
         502,
         'DIFY_SYNC_FAILED',
-        reason ? `Failed to sync file with Dify: ${reason}` : 'Failed to sync file with Dify.'
+        'Failed to sync file with Dify.',
+        reason ? { reason } : undefined
       );
     }
   }
