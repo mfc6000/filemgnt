@@ -3,6 +3,7 @@
 Vue 3 + Vite + TypeScript scaffold for the file management system UI.
 
 ## Prerequisites
+
 - Node.js >= 18
 - pnpm, npm, or yarn (examples below use npm)
 
@@ -38,6 +39,7 @@ frontend/
 ```
 
 ## Next Steps
+
 - Implement authentication views and tie into the backend mock auth.
 - Build repository/file management pages powered by real APIs.
 - Integrate Dify search UX once backend endpoints are ready.

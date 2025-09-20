@@ -96,8 +96,7 @@ const handleSubmit = async () => {
     Message.success(t('login.messages.success'));
     redirectAfterLogin();
   } catch (error: unknown) {
-    const message =
-      (error as any)?.response?.data?.error?.message ?? t('login.messages.failure');
+    const message = (error as any)?.response?.data?.error?.message ?? t('login.messages.failure');
     Message.error(message);
   } finally {
     loading.value = false;

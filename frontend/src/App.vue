@@ -19,11 +19,17 @@
               {{ t('common.greeting', { name: username }) }}
             </a-typography-text>
             <a-tag v-if="isAdmin" color="orangered" bordered>{{ t('common.adminTag') }}</a-tag>
-            <a-button type="outline" size="small" @click="handleLogout">{{ t('common.logout') }}</a-button>
+            <a-button type="outline" size="small" @click="handleLogout">{{
+              t('common.logout')
+            }}</a-button>
           </template>
           <template v-else>
-            <a-button type="text" class="header-link" @click="openDocs">{{ t('common.docs') }}</a-button>
-            <a-button type="primary" shape="round" @click="goLogin">{{ t('common.login') }}</a-button>
+            <a-button type="text" class="header-link" @click="openDocs">{{
+              t('common.docs')
+            }}</a-button>
+            <a-button type="primary" shape="round" @click="goLogin">{{
+              t('common.login')
+            }}</a-button>
           </template>
         </a-space>
       </div>
@@ -52,14 +58,14 @@ const username = computed(() => authStore.user?.username ?? '');
 
 const selectedLocale = computed({
   get: () => localeStore.locale,
-  set: (value) => localeStore.setLocale(value),
+  set: value => localeStore.setLocale(value),
 });
 
 const localeSelectOptions = computed(() =>
-  localeOptions.map((option) => ({
+  localeOptions.map(option => ({
     value: option.value,
     label: t(option.labelKey),
-  })),
+  }))
 );
 
 const goLogin = () => {

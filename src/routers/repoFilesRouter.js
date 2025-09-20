@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const { randomUUID } = require('crypto');
-const { listFiles, uploadFile } = require('../services/fileService');
+const { listFiles, uploadFile, deleteFile } = require('../services/fileService');
 const { getRepoForUser } = require('../services/repoService');
 
 const router = express.Router();
@@ -30,9 +30,8 @@ const allowedMimeTypes = new Set([
 ]);
 
 const configuredMax = Number(process.env.UPLOAD_MAX_BYTES);
-const maxUploadBytes = Number.isFinite(configuredMax) && configuredMax > 0
-  ? configuredMax
-  : 10 * 1024 * 1024;
+const maxUploadBytes =
+  Number.isFinite(configuredMax) && configuredMax > 0 ? configuredMax : 10 * 1024 * 1024;
 
 function createError(status, code, message) {
   const error = new Error(message);
@@ -104,7 +103,7 @@ router.post(
   '/:repoId/files',
   ensureRepoAccess,
   (req, res, next) => {
-    upload.single('file')(req, res, (error) => {
+    upload.single('file')(req, res, error => {
       if (!error) {
         next();
         return;
@@ -142,5 +141,14 @@ router.post(
     }
   }
 );
+
+router.delete('/:repoId/files/:fileId', ensureRepoAccess, async (req, res, next) => {
+  try {
+    const removed = await deleteFile(req.repo, req.params.fileId);
+    res.json({ data: removed });
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;

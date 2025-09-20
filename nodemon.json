@@ -1,0 +1,21 @@
+{
+  "watch": ["src"],
+  "ext": "js,json",
+  "ignore": [
+    "node_modules/**",
+    ".git/**",
+    "dist/**",
+    "build/**",
+    ".next/**",
+    "coverage/**",
+    "logs/**",
+    "tmp/**",
+    "*.log",
+    "**/*.swp",
+    "**/*.tmp",
+    "**/.#*",
+    "**/~*"
+  ],
+  "delay": "400",
+  "legacyWatch": true
+}

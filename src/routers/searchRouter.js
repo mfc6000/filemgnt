@@ -12,8 +12,8 @@ router.get('/', async (req, res, next) => {
         ? share.toLowerCase() === 'true'
           ? true
           : share.toLowerCase() === 'false'
-          ? false
-          : undefined
+            ? false
+            : undefined
         : undefined;
 
     const result = await search(req.user, q, {

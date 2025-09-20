@@ -26,7 +26,7 @@ function normalizeDifyItems(payload) {
   const rawItems = payload?.data || payload?.items || [];
   const total = typeof payload?.total === 'number' ? payload.total : rawItems.length;
 
-  const items = rawItems.map((item) => {
+  const items = rawItems.map(item => {
     const metadata = item.metadata || item.document_metadata || {};
     const document = item.document || {};
     const chunk = item.chunk || {};
@@ -47,8 +47,8 @@ function normalizeDifyItems(payload) {
         typeof item.score === 'number'
           ? item.score
           : typeof item.similarity === 'number'
-          ? item.similarity
-          : null,
+            ? item.similarity
+            : null,
     };
   });
 
@@ -62,9 +62,9 @@ async function performLocalSearch(user, query, options) {
   const pageSize = parsePageSize(options.pageSize);
   const startIndex = (page - 1) * pageSize;
 
-  const repoIndex = new Map(db.data.repos.map((repo) => [repo.id, repo]));
+  const repoIndex = new Map(db.data.repos.map(repo => [repo.id, repo]));
 
-  const filtered = db.data.files.filter((file) => {
+  const filtered = db.data.files.filter(file => {
     if (!file?.name) return false;
 
     if (options.repoId && file.repoId !== options.repoId) {
@@ -96,7 +96,7 @@ async function performLocalSearch(user, query, options) {
   const total = filtered.length;
   const paginated = filtered.slice(startIndex, startIndex + pageSize);
 
-  const items = paginated.map((file) => ({
+  const items = paginated.map(file => ({
     documentId: file.difyDocId || null,
     fileId: file.id,
     repoId: file.repoId,

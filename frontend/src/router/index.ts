@@ -1,12 +1,6 @@
-import {
-  createMemoryHistory,
-  createRouter,
-  createWebHistory,
-  RouteRecordRaw,
-} from 'vue-router';
+import { createMemoryHistory, createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { useAuthStore } from '@/store';
 import { i18n } from '@/plugins/i18n';
-
 
 const routes: RouteRecordRaw[] = [
   {
@@ -14,7 +8,6 @@ const routes: RouteRecordRaw[] = [
     name: 'home',
     component: () => import('@/views/HomeView.vue'),
     meta: { titleKey: 'router.home', requiresAuth: true },
-
   },
   {
     path: '/repos',
@@ -42,9 +35,10 @@ const routes: RouteRecordRaw[] = [
   },
 ];
 
-const history = typeof window !== 'undefined'
-  ? createWebHistory(import.meta.env.BASE_URL)
-  : createMemoryHistory();
+const history =
+  typeof window !== 'undefined'
+    ? createWebHistory(import.meta.env.BASE_URL)
+    : createMemoryHistory();
 
 const router = createRouter({
   history,
@@ -54,7 +48,7 @@ const router = createRouter({
   },
 });
 
-router.beforeEach((to) => {
+router.beforeEach(to => {
   const authStore = useAuthStore();
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
@@ -76,7 +70,7 @@ router.beforeEach((to) => {
   return true;
 });
 
-router.afterEach((to) => {
+router.afterEach(to => {
   if (typeof window !== 'undefined' && to.meta?.titleKey) {
     const titleKey = to.meta.titleKey as string;
     const pageTitle = i18n.global.t(titleKey);

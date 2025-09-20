@@ -10,7 +10,9 @@
         </div>
         <a-space class="quick-links" wrap>
           <a-button type="text" @click="goToRepos">{{ t('home.manageRepos') }}</a-button>
-          <a-button v-if="isAdmin" type="text" @click="goToUsers">{{ t('home.userManagement') }}</a-button>
+          <a-button v-if="isAdmin" type="text" @click="goToUsers">{{
+            t('home.userManagement')
+          }}</a-button>
         </a-space>
       </div>
 
@@ -37,7 +39,10 @@
           </span>
           <a-tag v-if="errorMessage" color="red">{{ t('home.tagError') }}</a-tag>
         </div>
-        <a-empty v-if="!loading && !errorMessage && results.length === 0" :description="t('home.noResults')">
+        <a-empty
+          v-if="!loading && !errorMessage && results.length === 0"
+          :description="t('home.noResults')"
+        >
           <template #image>
             <IconFile class="empty-icon" />
           </template>
@@ -60,8 +65,12 @@
               <div class="result-item">
                 <div class="result-title">
                   <IconFile class="result-icon" />
-                  <a-typography-text strong>{{ item.title || item.name || t('home.untitled') }}</a-typography-text>
-                  <a-tag v-if="item.repoId" size="small">{{ t('home.repoLabel', { id: item.repoId }) }}</a-tag>
+                  <a-typography-text strong>{{
+                    item.title || item.name || t('home.untitled')
+                  }}</a-typography-text>
+                  <a-tag v-if="item.repoId" size="small">{{
+                    t('home.repoLabel', { id: item.repoId })
+                  }}</a-tag>
                 </div>
                 <a-typography-paragraph v-if="item.snippet" class="snippet" ellipsis :rows="2">
                   {{ item.snippet }}
@@ -71,7 +80,9 @@
                     {{ t('home.scoreLabel', { score: item.score.toFixed(2) }) }}
                   </span>
                   <span v-if="item.fileId">{{ t('home.fileId', { id: item.fileId }) }}</span>
-                  <span v-if="item.documentId">{{ t('home.documentId', { id: item.documentId }) }}</span>
+                  <span v-if="item.documentId">{{
+                    t('home.documentId', { id: item.documentId })
+                  }}</span>
                 </div>
               </div>
             </a-list-item>
@@ -279,10 +290,4 @@ const handleSearch = async () => {
   }
 }
 </style>
-.result-icon {
-  font-size: 1.2rem;
-}
-
-.empty-icon {
-  font-size: 2.5rem;
-}
+.result-icon { font-size: 1.2rem; } .empty-icon { font-size: 2.5rem; }

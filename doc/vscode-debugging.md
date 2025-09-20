@@ -80,14 +80,14 @@ Create `.vscode/launch.json` with the following configuration:
 Inside `.vscode/launch.json`, add the following Chrome attach configuration:
 
 ```json
-    {
-      "name": "Frontend: Chrome",
-      "type": "pwa-chrome",
-      "request": "launch",
-      "url": "http://localhost:5173",
-      "webRoot": "${workspaceFolder}/frontend/src",
-      "preLaunchTask": "frontend:dev"
-    }
+{
+  "name": "Frontend: Chrome",
+  "type": "pwa-chrome",
+  "request": "launch",
+  "url": "http://localhost:5173",
+  "webRoot": "${workspaceFolder}/frontend/src",
+  "preLaunchTask": "frontend:dev"
+}
 ```
 
 This configuration launches a Chromium-based browser controlled by VS Code and maps source files back to the Vue single-file components.
@@ -135,13 +135,13 @@ The `preLaunchTask` from the launch configuration ensures Vite is running before
 
 ## Troubleshooting
 
-| Symptom | Fix |
-| --- | --- |
-| Breakpoints are grey / unbound | Ensure the server is started through VS Code or with `--inspect`. Check the `webRoot` path matches `frontend/src`. |
-| Nodemon restarts too frequently | Increase the debounce in `nodemon.json` or exclude directories like `uploads/`. |
+| Symptom                                   | Fix                                                                                                                   |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Breakpoints are grey / unbound            | Ensure the server is started through VS Code or with `--inspect`. Check the `webRoot` path matches `frontend/src`.    |
+| Nodemon restarts too frequently           | Increase the debounce in `nodemon.json` or exclude directories like `uploads/`.                                       |
 | TypeScript breakpoints off by a few lines | Make sure source maps are enabled (Vite does this automatically in dev). Clear the browser cache if the map is stale. |
-| Chrome instance already running | Close existing debug sessions or set `"url": "about:blank"` and open the Vite URL manually. |
-| `preLaunchTask` never finishes | Ensure `npm install` completed successfully in `frontend/`. The task waits for Vite to print the dev server banner. |
+| Chrome instance already running           | Close existing debug sessions or set `"url": "about:blank"` and open the Vite URL manually.                           |
+| `preLaunchTask` never finishes            | Ensure `npm install` completed successfully in `frontend/`. The task waits for Vite to print the dev server banner.   |
 
 ## Next steps
 

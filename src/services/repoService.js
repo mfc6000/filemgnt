@@ -14,7 +14,7 @@ async function listRepos(user) {
   }
 
   const db = await getDb();
-  const repos = db.data.repos.filter((repo) => repo.owner === user.username);
+  const repos = db.data.repos.filter(repo => repo.owner === user.username);
 
   return repos;
 }
@@ -38,7 +38,7 @@ async function createRepo(user, payload) {
 
   const db = await getDb();
   const duplicate = db.data.repos.find(
-    (repo) => repo.owner === user.username && repo.name.toLowerCase() === name.toLowerCase()
+    repo => repo.owner === user.username && repo.name.toLowerCase() === name.toLowerCase()
   );
 
   if (duplicate) {
@@ -74,7 +74,7 @@ async function getRepoForUser(user, repoId) {
   }
 
   const db = await getDb();
-  const repo = db.data.repos.find((item) => item.id === id);
+  const repo = db.data.repos.find(item => item.id === id);
 
   if (!repo) {
     throw createError(404, 'REPO_NOT_FOUND', 'Repository not found.');
