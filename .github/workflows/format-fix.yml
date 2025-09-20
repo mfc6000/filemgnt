@@ -19,6 +19,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .
+          git add -u
+          git reset .github/workflows   # 移除 workflow 文件改动
           git commit -m "chore: auto format via GitHub Actions" || echo "No changes to commit"
           git push
