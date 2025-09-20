@@ -22,39 +22,6 @@ function parsePageSize(value, fallback = 10) {
   return Math.min(50, parsed);
 }
 
-function normalizeDifyItems(payload) {
-  const rawItems = payload?.data || payload?.items || [];
-  const total = typeof payload?.total === 'number' ? payload.total : rawItems.length;
-
-  const items = rawItems.map(item => {
-    const metadata = item.metadata || item.document_metadata || {};
-    const document = item.document || {};
-    const chunk = item.chunk || {};
-
-    return {
-      documentId: item.document_id || item.documentId || item.id || null,
-      fileId: metadata.fileId || metadata.file_id || null,
-      repoId: metadata.repoId || metadata.repo_id || null,
-      title:
-        item.title ||
-        document.title ||
-        metadata.title ||
-        item.document_name ||
-        chunk.document_name ||
-        'Untitled document',
-      snippet: item.content || item.snippet || chunk.text || null,
-      score:
-        typeof item.score === 'number'
-          ? item.score
-          : typeof item.similarity === 'number'
-            ? item.similarity
-            : null,
-    };
-  });
-
-  return { items, total };
-}
-
 async function performLocalSearch(user, query, options) {
   const db = await getDb();
   const normalizedQuery = query.toLowerCase();
@@ -114,22 +81,75 @@ async function performLocalSearch(user, query, options) {
   };
 }
 
-async function performDifySearch(query, options) {
-  const payload = await searchKnowledgeBase(query, {
+async function performDifySearch(user, query, options) {
+  const db = await getDb();
+
+  const { records, page, pageSize } = await searchKnowledgeBase(query, {
     page: options.page,
     pageSize: options.pageSize,
     filters: options.filters,
+    retrievalModel: options.retrievalModel,
+    timeoutMs: options.timeoutMs,
   });
 
-  const page = parsePage(options.page);
-  const pageSize = parsePageSize(options.pageSize);
+  const repoIndex = new Map(db.data.repos.map(repo => [repo.id, repo]));
+  const fileIndex = new Map(
+    db.data.files
+      .filter(file => file?.difyDocId)
+      .map(file => [file.difyDocId, file])
+  );
 
-  const normalized = normalizeDifyItems(payload);
+  const filters = options.filters || {};
+  const filteredRecords = records.filter(record => {
+    if (!record?.documentId) {
+      return false;
+    }
+
+    const file = fileIndex.get(record.documentId);
+    if (!file) {
+      return false;
+    }
+
+    if (filters.repo_id && file.repoId !== filters.repo_id) {
+      return false;
+    }
+
+    if (filters.share !== undefined && Boolean(file.share) !== filters.share) {
+      return false;
+    }
+
+    if (user.role === 'admin') {
+      return true;
+    }
+
+    const repo = repoIndex.get(file.repoId);
+    const ownsRepo = repo?.owner === user.username;
+    if (ownsRepo) {
+      return true;
+    }
+
+    return Boolean(file.share);
+  });
+
+  const startIndex = (page - 1) * pageSize;
+  const paginatedRecords = filteredRecords.slice(startIndex, startIndex + pageSize);
+
+  const items = paginatedRecords.map(record => {
+    const file = fileIndex.get(record.documentId) || {};
+    return {
+      documentId: record.documentId,
+      fileId: file.id || null,
+      repoId: file.repoId || null,
+      title: file.name || `Document ${record.documentId}`,
+      snippet: record.content,
+      score: typeof record.score === 'number' ? record.score : null,
+    };
+  });
 
   return {
     source: 'dify',
-    items: normalized.items,
-    total: typeof payload.total === 'number' ? payload.total : normalized.total,
+    items,
+    total: filteredRecords.length,
     page,
     pageSize,
   };
@@ -157,12 +177,22 @@ async function search(user, query, options = {}) {
 
   if (isDifyConfigured()) {
     try {
-      return await performDifySearch(safeQuery, {
+      return await performDifySearch(user, safeQuery, {
         page: options.page,
         pageSize: options.pageSize,
         filters: Object.keys(filters).length ? filters : undefined,
+        retrievalModel: options.retrievalModel,
+        timeoutMs: options.timeoutMs,
       });
     } catch (error) {
+      console.error('[Search] Dify search failed', {
+        message: error.message,
+        status: error.status,
+        code: error.code,
+        url: error.url,
+        body: error.body,
+        stack: error.stack,
+      });
       const err = error;
       err.status = err.status || 502;
       err.code = err.code || 'DIFY_SEARCH_FAILED';
