@@ -1,9 +1,8 @@
 name: Format Check
 
 on:
-  workflow_run:
-    workflows: ["Format Fix"]
-    types: [completed]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   prettier:
