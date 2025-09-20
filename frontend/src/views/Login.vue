@@ -10,13 +10,14 @@
         </div>
       </template>
 
-      <a-form :model="form" layout="vertical" @submit.prevent="handleSubmit">
+      <a-form :model="form" layout="vertical">
         <a-form-item label="Username" field="username" :rules="usernameRules">
           <a-input
             v-model="form.username"
             placeholder="Enter username"
             allow-clear
             autocomplete="username"
+            @press-enter="handleSubmit"
           />
         </a-form-item>
         <a-form-item label="Password" field="password" :rules="passwordRules">
@@ -25,11 +26,12 @@
             placeholder="Enter password"
             allow-clear
             autocomplete="current-password"
+            @press-enter="handleSubmit"
           />
         </a-form-item>
 
         <a-space direction="vertical" :size="16" class="submit-section">
-          <a-button type="primary" html-type="submit" long :loading="loading">
+          <a-button type="primary" long :loading="loading" @click="handleSubmit">
             Login
           </a-button>
           <a-typography-text type="secondary" class="hint">

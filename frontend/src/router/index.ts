@@ -46,7 +46,6 @@ const history = typeof window !== 'undefined'
 
 const router = createRouter({
   history,
-
   routes,
   scrollBehavior() {
     return { top: 0 };

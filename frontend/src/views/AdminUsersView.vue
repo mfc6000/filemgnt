@@ -15,12 +15,16 @@
           class="user-form"
           :model="form"
           :disabled="creating"
-          @submit.prevent="handleCreate"
         >
           <a-row :gutter="16">
             <a-col :xs="24" :sm="12">
               <a-form-item label="Username" field="username" :validate-status="usernameStatus || undefined">
-                <a-input v-model="form.username" placeholder="e.g. alice" allow-clear />
+                <a-input
+                  v-model="form.username"
+                  placeholder="e.g. alice"
+                  allow-clear
+                  @press-enter="handleCreate"
+                />
                 <template v-if="usernameErrorMessage" #extra>
                   <a-typography-text type="danger">{{ usernameErrorMessage }}</a-typography-text>
                 </template>
@@ -28,7 +32,12 @@
             </a-col>
             <a-col :xs="24" :sm="12">
               <a-form-item label="Display name" field="displayName">
-                <a-input v-model="form.displayName" placeholder="Alice Johnson" allow-clear />
+                <a-input
+                  v-model="form.displayName"
+                  placeholder="Alice Johnson"
+                  allow-clear
+                  @press-enter="handleCreate"
+                />
               </a-form-item>
             </a-col>
             <a-col :xs="24" :sm="12">
@@ -41,12 +50,19 @@
             </a-col>
             <a-col :xs="24" :sm="12">
               <a-form-item label="Temporary password" field="password">
-                <a-input-password v-model="form.password" placeholder="Optional initial password" allow-clear />
+                <a-input-password
+                  v-model="form.password"
+                  placeholder="Optional initial password"
+                  allow-clear
+                  @press-enter="handleCreate"
+                />
               </a-form-item>
             </a-col>
           </a-row>
           <div class="form-actions">
-            <a-button type="primary" html-type="submit" :loading="creating">Create user</a-button>
+            <a-button type="primary" :loading="creating" @click="handleCreate">
+              Create user
+            </a-button>
           </div>
         </a-form>
       </a-card>

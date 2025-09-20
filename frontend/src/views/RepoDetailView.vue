@@ -20,7 +20,7 @@
         <template #title>
           Upload files
         </template>
-        <a-form class="upload-form" layout="vertical" @submit.prevent="handleUpload">
+        <a-form class="upload-form" layout="vertical">
           <a-row :gutter="16">
             <a-col :xs="24" :sm="14">
               <input ref="fileInput" type="file" class="file-input" @change="onFileChange" />
@@ -32,7 +32,9 @@
             </a-col>
             <a-col :xs="12" :sm="5">
               <div class="upload-actions">
-                <a-button type="primary" html-type="submit" :loading="uploading">Upload</a-button>
+                <a-button type="primary" :loading="uploading" @click="handleUpload">
+                  Upload
+                </a-button>
                 <a-button type="text" :disabled="uploading" @click="resetForm">Reset</a-button>
               </div>
             </a-col>

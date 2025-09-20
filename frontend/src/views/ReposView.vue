@@ -15,12 +15,16 @@
           class="repo-form"
           :model="form"
           :disabled="creating"
-          @submit.prevent="handleCreate"
         >
           <a-row :gutter="16">
             <a-col :xs="24" :sm="12">
               <a-form-item label="Repository name" field="name" :validate-status="nameError || undefined">
-                <a-input v-model="form.name" placeholder="e.g. Contracts" allow-clear />
+                <a-input
+                  v-model="form.name"
+                  placeholder="e.g. Contracts"
+                  allow-clear
+                  @press-enter="handleCreate"
+                />
                 <template v-if="nameError" #extra>
                   <a-typography-text type="danger">{{ nameErrorMessage }}</a-typography-text>
                 </template>
@@ -47,7 +51,9 @@
             </a-col>
           </a-row>
           <div class="form-actions">
-            <a-button type="primary" html-type="submit" :loading="creating">Create repository</a-button>
+            <a-button type="primary" :loading="creating" @click="handleCreate">
+              Create repository
+            </a-button>
           </div>
         </a-form>
       </a-card>
