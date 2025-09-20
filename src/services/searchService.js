@@ -94,9 +94,7 @@ async function performDifySearch(user, query, options) {
 
   const repoIndex = new Map(db.data.repos.map(repo => [repo.id, repo]));
   const fileIndex = new Map(
-    db.data.files
-      .filter(file => file?.difyDocId)
-      .map(file => [file.difyDocId, file])
+    db.data.files.filter(file => file?.difyDocId).map(file => [file.difyDocId, file])
   );
 
   const filters = options.filters || {};
@@ -104,7 +102,7 @@ async function performDifySearch(user, query, options) {
     if (!record?.documentId) {
       return false;
     }
-    
+
     const file = fileIndex.get(record.documentId);
     if (!file) {
       return false;
