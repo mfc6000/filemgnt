@@ -153,7 +153,6 @@ const formatDate = (value: string) => {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 };
 
-
 const columns = computed(() => [
   { title: t('adminUsers.table.columns.username'), dataIndex: 'username' },
   { title: t('adminUsers.table.columns.displayName'), dataIndex: 'displayName' },

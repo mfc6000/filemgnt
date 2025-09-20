@@ -132,6 +132,36 @@ async function refreshDifyDocument(documentId) {
   return false;
 }
 
+async function deleteDifyDocument(documentId) {
+  if (!documentId) {
+    return false;
+  }
+
+  const { baseUrl, kbId, apiKey } = ensureConfigured();
+
+  const response = await fetch(`${baseUrl}/v1/knowledge-bases/${kbId}/documents/${documentId}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+
+  if (response.status === 404) {
+    return false;
+  }
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw createDifyError(
+      response.status,
+      'DIFY_DELETE_FAILED',
+      `Dify document deletion failed (${response.status}): ${text}`
+    );
+  }
+
+  return true;
+}
+
 async function searchKnowledgeBase(query, options = {}) {
   const { baseUrl, kbId, apiKey } = ensureConfigured();
 
@@ -178,4 +208,5 @@ module.exports = {
   refreshDifyDocument,
   searchKnowledgeBase,
   isDifyConfigured,
+  deleteDifyDocument,
 };

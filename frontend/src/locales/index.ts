@@ -114,6 +114,7 @@ export const messages = {
         size: '大小',
         share: '共享状态',
         created: '上传时间',
+        actions: '操作',
       },
       meta: {
         created: '创建时间：{date}',
@@ -122,6 +123,15 @@ export const messages = {
       shareTag: {
         true: '已分享',
         false: '私有',
+      },
+      actions: {
+        delete: '删除',
+      },
+      confirm: {
+        title: '删除文件',
+        message: '确定要删除“{name}”吗？该操作无法恢复。',
+        ok: '删除',
+        cancel: '取消',
       },
       messages: {
         invalidRepo: '仓库 ID 无效',
@@ -135,6 +145,9 @@ export const messages = {
         uploadFailed: '上传失败',
         uploadUnexpected: '上传文件时发生未知错误',
         success: '文件上传成功',
+        deleteSuccess: '已删除文件“{name}”',
+        deleteFailed: '删除文件失败',
+        deleteUnexpected: '删除文件时发生未知错误',
       },
     },
     adminUsers: {
@@ -333,6 +346,7 @@ export const messages = {
         size: 'Size',
         share: 'Share',
         created: 'Uploaded at',
+        actions: 'Actions',
       },
       meta: {
         created: 'Created: {date}',
@@ -341,6 +355,15 @@ export const messages = {
       shareTag: {
         true: 'shared',
         false: 'private',
+      },
+      actions: {
+        delete: 'Delete',
+      },
+      confirm: {
+        title: 'Delete file',
+        message: 'Are you sure you want to delete “{name}”? This action cannot be undone.',
+        ok: 'Delete',
+        cancel: 'Cancel',
       },
       messages: {
         invalidRepo: 'Invalid repository id',
@@ -354,6 +377,9 @@ export const messages = {
         uploadFailed: 'Upload failed',
         uploadUnexpected: 'Unexpected error while uploading file',
         success: 'File uploaded successfully',
+        deleteSuccess: 'Deleted “{name}”',
+        deleteFailed: 'Failed to delete file',
+        deleteUnexpected: 'Unexpected error while deleting file',
       },
     },
     adminUsers: {
