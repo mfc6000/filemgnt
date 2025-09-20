@@ -249,7 +249,6 @@ const handleUpload = async () => {
 
   try {
     const { data } = await http.post(`/repos/${repoId.value}/files`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress: (event) => {
         if (!event.total) {
           return;
