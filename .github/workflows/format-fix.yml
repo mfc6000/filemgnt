@@ -1,0 +1,24 @@
+name: Format Fix
+
+on:
+  workflow_dispatch:   # 手动触发
+
+jobs:
+  prettier-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # 必须有写权限才能推回去
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci || npm i
+      - run: npm run format
+      - name: Commit & Push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: auto format via GitHub Actions" || echo "No changes to commit"
+          git push
