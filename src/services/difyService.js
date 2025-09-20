@@ -268,7 +268,6 @@ async function searchKnowledgeBase(query, options = {}) {
 
   const page = Math.max(1, Number.parseInt(options.page, 10) || 1);
   const pageSize = Math.max(1, Math.min(50, Number.parseInt(options.pageSize, 10) || 10));
-
   const retrievalModel = {};
 
   if (options.retrievalModel && typeof options.retrievalModel === 'object') {
