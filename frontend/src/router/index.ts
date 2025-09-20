@@ -1,4 +1,10 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import {
+  createMemoryHistory,
+  createRouter,
+  createWebHistory,
+  RouteRecordRaw,
+} from 'vue-router';
+
 import { useAuthStore } from '@/store';
 
 const routes: RouteRecordRaw[] = [
@@ -34,34 +40,39 @@ const routes: RouteRecordRaw[] = [
   },
 ];
 
+const history = typeof window !== 'undefined'
+  ? createWebHistory(import.meta.env.BASE_URL)
+  : createMemoryHistory();
+
 const router = createRouter({
-  history: createWebHistory(),
+  history,
+
   routes,
   scrollBehavior() {
     return { top: 0 };
   },
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
   const authStore = useAuthStore();
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'login', query: { redirect: to.fullPath } });
-    return;
+    return { name: 'login', query: { redirect: to.fullPath } };
   }
 
   if (to.meta.requiresAdmin && !authStore.isAdmin) {
-    next({ name: 'home' });
-    return;
+    return { name: 'home' };
   }
 
   if (to.name === 'login' && authStore.isAuthenticated) {
-    const redirectTarget = typeof to.query.redirect === 'string' ? to.query.redirect : '/';
-    next(redirectTarget || { name: 'home' });
-    return;
+    const redirectTarget =
+      typeof to.query.redirect === 'string' && to.query.redirect.length > 0
+        ? { path: to.query.redirect }
+        : { name: 'home' };
+    return redirectTarget;
   }
 
-  next();
+  return true;
 });
 
 router.afterEach((to) => {
