@@ -138,13 +138,25 @@ The repository ships with Dockerfiles for the API and the frontend plus a Compos
 
 ```bash
 # Ensure Dify variables exist in your shell or .env file
-export DIFY_BASE_URL=https://api.dify.ai
-export DIFY_KB_ID=your_kb_id
+export DIFY_BASE_URL=https://api.dify.ai/v1
+export DIFY_DATASET_ID=your_dataset_id   # or set DIFY_KB_ID for backward compatibility
 export DIFY_API_KEY=your_api_key
 
 # Build and launch
 docker compose up --build
 ```
+
+### Dify chunk retrieval helper
+
+The backend exposes a `retrieveChunks` helper that wraps the Dify datasets retrieval API. Configure the following environment variables before invoking it directly or through the API:
+
+```bash
+export DIFY_BASE_URL=https://<your-dify-host>/v1
+export DIFY_API_KEY=sk-...
+export DIFY_DATASET_ID=...
+```
+
+If your environment requires an outbound proxy, set `HTTPS_PROXY` (and `HTTP_PROXY` when needed) before starting the server so that Node's fetch client routes requests accordingly.
 
 Services start on:
 
