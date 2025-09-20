@@ -334,6 +334,21 @@ async function searchKnowledgeBase(query, options = {}) {
     retrievalModel.metadata_filter = options.filters;
   }
 
+  if (retrievalModel.score_threshold_enabled === undefined) {
+    retrievalModel.score_threshold_enabled = true;
+  }
+
+  if (
+    retrievalModel.score_threshold === undefined ||
+    retrievalModel.score_threshold === null ||
+    Number.isNaN(Number(retrievalModel.score_threshold)) ||
+    Number(retrievalModel.score_threshold) < 0.2
+  ) {
+    retrievalModel.score_threshold = 0.2;
+  } else {
+    retrievalModel.score_threshold = Number(retrievalModel.score_threshold);
+  }
+
   if (retrievalModel.top_k === undefined) {
     const desired = Math.max(page * pageSize, pageSize * 2);
     retrievalModel.top_k = Math.min(200, desired);

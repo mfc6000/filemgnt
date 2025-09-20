@@ -2,8 +2,6 @@ name: Format Fix
 
 on:
   workflow_dispatch:   # 手动触发
-  pull_request:
-    branches: ['main']
 
 jobs:
   prettier-fix:
