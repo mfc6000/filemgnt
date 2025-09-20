@@ -161,14 +161,22 @@ async function searchKnowledgeBase(query, options = {}) {
 
   const page = Math.max(1, Number.parseInt(options.page, 10) || 1);
   const pageSize = Math.max(1, Math.min(50, Number.parseInt(options.pageSize, 10) || 10));
-  const filters = options.filters && typeof options.filters === 'object' ? options.filters : null;
+  const body = {
+    keywords: query || '',
+    page,
+    limit: pageSize,
+  };
 
-  const url = new URL(`${baseUrl}/v1/datasets/${kbId}/documents`);
-  url.searchParams.set('page', page.toString());
-  url.searchParams.set('limit', pageSize.toString());
+  if (
+    options.filters &&
+    typeof options.filters === 'object' &&
+    Object.keys(options.filters).length > 0
+  ) {
+    body.metadata_filter = options.filters;
+  }
 
-  const response = await fetch(url, {
-    method: 'GET',
+  const response = await fetch(`${baseUrl}/v1/datasets/${kbId}/documents/search`, {
+    method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
     },
@@ -176,7 +184,7 @@ async function searchKnowledgeBase(query, options = {}) {
 
   if (!response.ok) {
     const text = await response.text();
-    const error = new Error(`Dify dataset documents fetch failed (${response.status}): ${text}`);
+    const error = new Error(`Dify dataset search failed (${response.status}): ${text}`);
     error.status = response.status;
     error.code = 'DIFY_SEARCH_FAILED';
     throw error;
