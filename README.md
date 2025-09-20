@@ -169,3 +169,8 @@ frontend/             # Vue 3 + Vite scaffold
 ```
 
 Refer to the documents inside `doc/` for acceptance criteria, architecture notes, and upgrade guidance.
+
+
+## Notes and Comments
+👉 [WSL Node.js Guide](doc/wsl_node_nodemon_guide.md)
+
