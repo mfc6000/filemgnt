@@ -54,7 +54,6 @@ async function uploadFile(repo, user, file, options = {}) {
 
   let difyDocId = null;
   let difySyncStatus = 'skipped';
-  let difySyncError = null;
 
   if (isDifyConfigured()) {
     difySyncStatus = 'pending';
@@ -62,9 +61,13 @@ async function uploadFile(repo, user, file, options = {}) {
       difyDocId = await uploadToDify(file.path, file.originalname);
       difySyncStatus = 'succeeded';
     } catch (error) {
-      difySyncStatus = 'failed';
-      difySyncError = error.message || 'Failed to sync with Dify.';
       console.error('Dify upload failed:', error);
+      const reason = typeof error?.message === 'string' ? error.message.trim() : '';
+      throw createError(
+        502,
+        'DIFY_SYNC_FAILED',
+        reason ? `Failed to sync file with Dify: ${reason}` : 'Failed to sync file with Dify.'
+      );
     }
   }
 
@@ -72,7 +75,6 @@ async function uploadFile(repo, user, file, options = {}) {
     ...baseMetadata,
     ...(difyDocId ? { difyDocId } : {}),
     difySyncStatus,
-    ...(difySyncError ? { difySyncError } : {}),
   };
 
   db.data.files.push(metadata);

@@ -120,8 +120,7 @@ interface FileItem {
   createdAt: string;
   storagePath: string;
   difyDocId?: string;
-  difySyncStatus?: 'pending' | 'succeeded' | 'failed' | 'skipped';
-  difySyncError?: string;
+  difySyncStatus?: 'pending' | 'succeeded' | 'skipped';
 }
 
 interface FilesResponse {
