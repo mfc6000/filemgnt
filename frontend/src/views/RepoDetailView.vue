@@ -107,6 +107,8 @@ interface FileItem {
   createdAt: string;
   storagePath: string;
   difyDocId?: string;
+  difySyncStatus?: 'pending' | 'succeeded' | 'failed' | 'skipped';
+  difySyncError?: string;
 }
 
 interface FilesResponse {
@@ -249,7 +251,6 @@ const handleUpload = async () => {
 
   try {
     const { data } = await http.post(`/repos/${repoId.value}/files`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress: (event) => {
         if (!event.total) {
           return;
@@ -263,6 +264,15 @@ const handleUpload = async () => {
       files.value = [created, ...files.value];
     }
     Message.success({ content: t('repoDetail.messages.success'), duration: 2000 });
+    if (created?.difySyncStatus === 'failed') {
+      const reason = created.difySyncError?.trim();
+      Message.warning({
+        content: reason
+          ? t('repoDetail.messages.difySyncFailedWithReason', { reason })
+          : t('repoDetail.messages.difySyncFailed'),
+        duration: 4000,
+      });
+    }
     await loadFiles();
     resetForm();
   } catch (error) {

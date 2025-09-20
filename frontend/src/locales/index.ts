@@ -135,6 +135,8 @@ export const messages = {
         uploadFailed: '上传失败',
         uploadUnexpected: '上传文件时发生未知错误',
         success: '文件上传成功',
+        difySyncFailed: '文件已上传，但同步至 Dify 知识库失败。',
+        difySyncFailedWithReason: '文件已上传，但同步至 Dify 知识库失败：{reason}',
       },
     },
     adminUsers: {
@@ -354,6 +356,8 @@ export const messages = {
         uploadFailed: 'Upload failed',
         uploadUnexpected: 'Unexpected error while uploading file',
         success: 'File uploaded successfully',
+        difySyncFailed: 'File uploaded, but syncing to the Dify knowledge base failed.',
+        difySyncFailedWithReason: 'File uploaded, but syncing to the Dify knowledge base failed: {reason}',
       },
     },
     adminUsers: {
