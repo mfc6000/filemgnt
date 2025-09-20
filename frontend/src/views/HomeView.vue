@@ -37,7 +37,6 @@
           </span>
           <a-tag v-if="errorMessage" color="red">{{ t('home.tagError') }}</a-tag>
         </div>
-
         <a-empty v-if="!loading && !errorMessage && results.length === 0" :description="t('home.noResults')">
           <template #image>
             <IconFile class="empty-icon" />
@@ -112,7 +111,6 @@ interface SearchResponse {
 const router = useRouter();
 const authStore = useAuthStore();
 const { t } = useI18n();
-
 const isAdmin = computed(() => authStore.isAdmin);
 const query = ref('');
 const queryError = ref('');

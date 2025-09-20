@@ -29,7 +29,7 @@
             </a-col>
             <a-col :xs="12" :sm="5">
               <a-form-item :label="t('repoDetail.shareLabel')">
-                <a-switch v-model="share" size="small" />
+               <a-switch v-model="share" size="small" />
               </a-form-item>
             </a-col>
             <a-col :xs="12" :sm="5">

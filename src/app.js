@@ -24,7 +24,6 @@ function createApp() {
   app.use('/api/repos', authMiddleware, reposRouter);
   app.use('/api/repos', authMiddleware, repoFilesRouter);
   app.use('/api/search', authMiddleware, searchRouter);
-
   app.use(notFoundHandler);
   app.use(errorHandler);
 
