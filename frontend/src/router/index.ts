@@ -4,6 +4,7 @@ import {
   createWebHistory,
   RouteRecordRaw,
 } from 'vue-router';
+
 import { useAuthStore } from '@/store';
 
 const routes: RouteRecordRaw[] = [
@@ -45,6 +46,7 @@ const history = typeof window !== 'undefined'
 
 const router = createRouter({
   history,
+
   routes,
   scrollBehavior() {
     return { top: 0 };
