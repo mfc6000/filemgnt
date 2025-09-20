@@ -50,8 +50,10 @@ async function uploadToDify(filePath, fileName) {
   const blob = new Blob([buffer]);
   const formData = new FormData();
   formData.append('file', blob, fileName);
+  formData.append('indexing_technique', 'high_quality');
+  formData.append('process_rule', JSON.stringify({ mode: 'automatic' }));
 
-  const response = await fetch(`${baseUrl}/v1/knowledge-bases/${kbId}/documents`, {
+  const response = await fetch(`${baseUrl}/v1/datasets/${kbId}/document/create-by-file`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -69,12 +71,18 @@ async function uploadToDify(filePath, fileName) {
   }
 
   const payload = await response.json();
-  if (payload?.data?.id) {
-    return payload.data.id;
-  }
+  const candidates = [
+    payload?.data?.id,
+    payload?.data?.document_id,
+    payload?.document_id,
+    payload?.documentId,
+    payload?.id,
+  ];
 
-  if (payload?.id) {
-    return payload.id;
+  for (const candidate of candidates) {
+    if (candidate) {
+      return candidate;
+    }
   }
 
   return null;
@@ -87,47 +95,35 @@ async function refreshDifyDocument(documentId) {
 
   const { baseUrl, kbId, apiKey } = ensureConfigured();
 
-  const endpoints = [
-    `${baseUrl}/v1/knowledge-bases/${kbId}/documents/${documentId}/refresh`,
-    `${baseUrl}/v1/knowledge-bases/${kbId}/documents/${documentId}/sync`,
-    `${baseUrl}/v1/knowledge-bases/${kbId}/documents/${documentId}/index`,
-  ];
-
-  let lastError = null;
-
-  for (const url of endpoints) {
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
-
-      if (response.ok) {
-        return true;
-      }
-
-      if (response.status === 404) {
-        continue;
-      }
-
-      const text = await response.text();
-      lastError = createDifyError(
-        response.status,
-        'DIFY_REFRESH_FAILED',
-        `Dify document refresh failed (${response.status}): ${text}`
-      );
-    } catch (error) {
-      lastError = error;
+  const response = await fetch(
+    `${baseUrl}/v1/datasets/${kbId}/documents/${documentId}/indexing-status`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
     }
+  );
+
+  if (response.status === 404) {
+    return false;
   }
 
-  if (lastError) {
-    throw lastError;
+  if (!response.ok) {
+    const text = await response.text();
+    throw createDifyError(
+      response.status,
+      'DIFY_REFRESH_FAILED',
+      `Dify indexing status fetch failed (${response.status}): ${text}`
+    );
   }
 
-  return false;
+  const payload = await response.json();
+  if (payload?.status) {
+    return payload.status;
+  }
+
+  return true;
 }
 
 async function deleteDifyDocument(documentId) {
@@ -137,7 +133,7 @@ async function deleteDifyDocument(documentId) {
 
   const { baseUrl, kbId, apiKey } = ensureConfigured();
 
-  const response = await fetch(`${baseUrl}/v1/knowledge-bases/${kbId}/documents/${documentId}`, {
+  const response = await fetch(`${baseUrl}/v1/datasets/${kbId}/documents/${documentId}`, {
     method: 'DELETE',
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -165,36 +161,83 @@ async function searchKnowledgeBase(query, options = {}) {
 
   const page = Math.max(1, Number.parseInt(options.page, 10) || 1);
   const pageSize = Math.max(1, Math.min(50, Number.parseInt(options.pageSize, 10) || 10));
-  const offset = (page - 1) * pageSize;
+  const filters = options.filters && typeof options.filters === 'object' ? options.filters : null;
 
-  const body = {
-    query,
-    top_n: pageSize,
-    offset,
-  };
+  const url = new URL(`${baseUrl}/v1/datasets/${kbId}/documents`);
+  url.searchParams.set('page', page.toString());
+  url.searchParams.set('limit', pageSize.toString());
 
-  if (options.filters && Object.keys(options.filters).length > 0) {
-    body.filter = options.filters;
-  }
-
-  const response = await fetch(`${baseUrl}/v1/knowledge-bases/${kbId}/search`, {
-    method: 'POST',
+  const response = await fetch(url, {
+    method: 'GET',
     headers: {
       Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
     },
-    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
     const text = await response.text();
-    const error = new Error(`Dify search failed (${response.status}): ${text}`);
+    const error = new Error(`Dify dataset documents fetch failed (${response.status}): ${text}`);
     error.status = response.status;
     error.code = 'DIFY_SEARCH_FAILED';
     throw error;
   }
 
-  return response.json();
+  const payload = await response.json();
+
+  if (!query) {
+    return payload;
+  }
+
+  const normalizedQuery = query.toLowerCase();
+  const data = Array.isArray(payload?.data)
+    ? payload.data
+    : Array.isArray(payload?.items)
+      ? payload.items
+      : [];
+
+  const filtered = data.filter(item => {
+    const name =
+      (typeof item?.name === 'string' && item.name) ||
+      (typeof item?.document_name === 'string' && item.document_name) ||
+      (typeof item?.title === 'string' && item.title) ||
+      '';
+
+    if (!name.toLowerCase().includes(normalizedQuery)) {
+      return false;
+    }
+
+    if (!filters) {
+      return true;
+    }
+
+    const metadata =
+      (item && typeof item === 'object' && (item.metadata || item.document_metadata || {})) || {};
+
+    return Object.entries(filters).every(([key, value]) => {
+      if (metadata[key] === undefined) {
+        return false;
+      }
+
+      if (Array.isArray(value)) {
+        return value.includes(metadata[key]);
+      }
+
+      return metadata[key] === value;
+    });
+  });
+
+  if (filtered.length === data.length) {
+    return payload;
+  }
+
+  return {
+    ...payload,
+    data: filtered,
+    total:
+      typeof payload?.total === 'number'
+        ? Math.min(payload.total, filtered.length)
+        : filtered.length,
+  };
 }
 
 function isDifyConfigured() {
