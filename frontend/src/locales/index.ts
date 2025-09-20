@@ -397,7 +397,8 @@ export const messages = {
         FILE_TOO_LARGE: 'The file exceeds the allowed size.',
         FILE_TOO_LARGE_WITH_LIMIT: 'The file exceeds the allowed size (max {limit}).',
         DIFY_SYNC_FAILED: 'Failed to sync the file with the Dify knowledge base.',
-        DIFY_SYNC_FAILED_WITH_REASON: 'Failed to sync the file with the Dify knowledge base: {reason}',
+        DIFY_SYNC_FAILED_WITH_REASON:
+          'Failed to sync the file with the Dify knowledge base: {reason}',
         UNSUPPORTED_FILE_TYPE: 'This file type is not supported.',
         UNAUTHORIZED: 'You are not authorized. Please sign in again.',
         INTERNAL_ERROR: 'Server error. Please try again later.',

@@ -129,9 +129,7 @@ router.post(
   },
   async (req, res, next) => {
     if (!req.file) {
-      next(
-        createError(400, 'FILE_REQUIRED', 'A file must be uploaded using the "file" field.')
-      );
+      next(createError(400, 'FILE_REQUIRED', 'A file must be uploaded using the "file" field.'));
       return;
     }
 

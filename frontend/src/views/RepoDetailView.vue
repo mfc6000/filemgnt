@@ -217,9 +217,7 @@ const resolveErrorMessage = (error: unknown, fallbackKey: string) => {
       ? details.reason.trim()
       : undefined;
   const limitValue =
-    typeof details.limit === 'number' && Number.isFinite(details.limit)
-      ? details.limit
-      : undefined;
+    typeof details.limit === 'number' && Number.isFinite(details.limit) ? details.limit : undefined;
 
   if (code === 'DIFY_SYNC_FAILED') {
     if (reason) {
@@ -323,7 +321,7 @@ const handleUpload = async () => {
 
   try {
     const { data } = await http.post(`/repos/${repoId.value}/files`, formData, {
-      onUploadProgress: (event) => {
+      onUploadProgress: event => {
         if (!event.total) {
           return;
         }
